@@ -11,35 +11,35 @@ def main():
         project_name="example_app",
         db_path="./logs/example_app.duckdb",
         log_level="INFO",
-        console_logging=True
+        console_logging=True,
     )
-    
+
     # Get a logger instance
     logger = get_logger(__name__)
-    
+
     # Basic logging
     logger.info("Application started")
     logger.debug("This is a debug message")
     logger.warning("This is a warning")
-    
+
     # Log specific actions
     logger.log_action(
         action="initialization",
         message="App initialized successfully",
         success=True,
         duration_ms=150,
-        context={"version": "1.0.0"}
+        context={"version": "1.0.0"},
     )
-    
+
     # Test the decorator
     process_data()
-    
+
     # Test exception logging
     try:
         risky_operation()
     except Exception as e:
         logger.log_exception("risky_operation", e)
-    
+
     logger.info("Application finished")
 
 

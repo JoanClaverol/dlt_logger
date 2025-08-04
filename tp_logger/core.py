@@ -5,8 +5,9 @@ import time
 import logging
 from functools import wraps
 from contextlib import contextmanager
-from typing import Optional, Dict, Any, Callable, List
+from typing import Optional, Dict, Any, Callable, List, Literal
 from uuid import uuid4
+from datetime import datetime
 
 import dlt
 from loguru import logger
@@ -24,7 +25,7 @@ RUN_ID = uuid4()
 
 class InterceptHandler(logging.Handler):
     """Handler to intercept standard logging and redirect to loguru."""
-    
+
     def emit(self, record):
         try:
             level = logger.level(record.levelname).name
@@ -51,7 +52,7 @@ def get_pipeline() -> dlt.Pipeline:
         _pipeline = dlt.pipeline(
             pipeline_name=config.pipeline_name,
             destination="duckdb",
-            dataset_name=config.dataset_name
+            dataset_name=config.dataset_name,
         )
     return _pipeline
 
@@ -73,7 +74,7 @@ def get_pipeline() -> dlt.Pipeline:
         "duration_ms": {"data_type": "bigint"},
         "request_method": {"data_type": "text"},
         "context": {"data_type": "json"},
-    }
+    },
 )
 def job_logs(log_entries: List[LogEntry]):
     """DLT resource for job logs."""
@@ -83,19 +84,19 @@ def job_logs(log_entries: List[LogEntry]):
 
 class TPLogger:
     """Main logger class for tp-logger using DLT."""
-    
+
     def __init__(self, module_name: str):
         self.module_name = module_name
         self.config = get_config()
         self.pipeline = get_pipeline()
         self.loguru_logger = logger.bind(name=module_name)
-        
+
         # Buffer for batch writes (optional optimization)
         self._log_buffer: List[LogEntry] = []
-    
+
     def _create_log_entry(
         self,
-        level: str,
+        level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         message: str,
         action: Optional[str] = None,
         function_name: Optional[str] = None,
@@ -118,9 +119,9 @@ class TPLogger:
             status_code=status_code,
             duration_ms=duration_ms,
             request_method=request_method,
-            context=context or {}
+            context=context or {},
         )
-    
+
     def _log_to_dlt(self, log_entry: LogEntry):
         """Log entry using DLT."""
         try:
@@ -128,46 +129,48 @@ class TPLogger:
             self.pipeline.run(job_logs([log_entry]))
         except Exception as e:
             print(f"DLT logging failed: {e}")
-    
-    def _log(self, level: str, message: str, **kwargs):
+
+    def _log(self, level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], message: str, **kwargs):
         """Internal logging method."""
         # Console logging
         if self.config.console_logging:
             getattr(self.loguru_logger, level.lower())(message)
-        
+
         # Create log entry and store via DLT
-        log_entry = self._create_log_entry(level=level.upper(), message=message, **kwargs)
+        log_entry = self._create_log_entry(
+            level=level, message=message, **kwargs
+        )
         self._log_to_dlt(log_entry)
-    
+
     def debug(self, message: str, **kwargs):
         self._log("DEBUG", message, **kwargs)
-    
+
     def info(self, message: str, **kwargs):
         self._log("INFO", message, **kwargs)
-    
+
     def warning(self, message: str, **kwargs):
         self._log("WARNING", message, **kwargs)
-    
+
     def error(self, message: str, **kwargs):
         self._log("ERROR", message, **kwargs)
-    
+
     def critical(self, message: str, **kwargs):
         self._log("CRITICAL", message, **kwargs)
-    
+
     def log_action(
         self,
         action: str,
         message: str,
         success: bool = True,
-        level: Optional[str] = None,
+        level: Optional[Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]] = None,
         duration_ms: Optional[int] = None,
         context: Optional[Dict[str, Any]] = None,
-        **kwargs
+        **kwargs,
     ):
         """Log a specific action with metadata."""
         if level is None:
             level = "INFO" if success else "ERROR"
-        
+
         self._log(
             level=level,
             message=message,
@@ -175,9 +178,9 @@ class TPLogger:
             success=success,
             duration_ms=duration_ms,
             context=context,
-            **kwargs
+            **kwargs,
         )
-    
+
     def log_exception(self, action: str, exception: Exception):
         """Log an exception."""
         self._log(
@@ -191,26 +194,26 @@ class TPLogger:
 
 def setup_logging(**kwargs):
     """Setup tp-logger with the given configuration.
-    
+
     Args:
         project_name (str): Name of your project
-        db_path (str): Path to DuckDB file  
+        db_path (str): Path to DuckDB file
         log_level (str): Minimum log level
         console_logging (bool): Enable console output
         dataset_name (str): DLT dataset name
         pipeline_name (str): DLT pipeline name
-        
+
     All parameters are optional and will use defaults from config.py if not provided.
     """
     global _pipeline
-    
+
     # Create configuration using the config module with provided parameters
     config = LoggerConfig(**kwargs)
     set_config(config)
-    
+
     # Reset pipeline to use new config
     _pipeline = None
-    
+
     # Setup console logging
     if config.console_logging:
         setup_console_logging()
@@ -219,10 +222,10 @@ def setup_logging(**kwargs):
 def setup_console_logging():
     """Setup console logging with loguru."""
     config = get_config()
-    
+
     if not config.console_logging:
         return
-    
+
     # Configure loguru
     logger.remove()
     log_format = (
@@ -231,7 +234,7 @@ def setup_console_logging():
         "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
     )
     logger.add(sys.stdout, format=log_format, level=config.log_level)
-    
+
     # Setup intercept handler for standard logging
     root_logger = logging.getLogger()
     root_logger.handlers = []
@@ -247,16 +250,16 @@ def get_logger(name: str) -> TPLogger:
 
 def log_execution(action: Optional[str] = None):
     """Decorator to automatically log function execution with timing."""
-    
+
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
             module_name = func.__module__
             function_name = func.__name__
             action_name = action or f"{function_name}_execution"
-            
+
             tp_logger = TPLogger(module_name)
-            
+
             start_time = time.time()
             try:
                 tp_logger.info(
@@ -265,9 +268,9 @@ def log_execution(action: Optional[str] = None):
                     function_name=function_name,
                     success=True,
                 )
-                
+
                 result = func(*args, **kwargs)
-                
+
                 duration_ms = int((time.time() - start_time) * 1000)
                 tp_logger.info(
                     f"Completed {action_name} in {duration_ms}ms",
@@ -276,9 +279,9 @@ def log_execution(action: Optional[str] = None):
                     success=True,
                     duration_ms=duration_ms,
                 )
-                
+
                 return result
-                
+
             except Exception as e:
                 duration_ms = int((time.time() - start_time) * 1000)
                 tp_logger.log_exception(action_name, e)
@@ -291,9 +294,9 @@ def log_execution(action: Optional[str] = None):
                     duration_ms=duration_ms,
                 )
                 raise
-        
+
         return wrapper
-    
+
     return decorator
 
 
@@ -324,3 +327,87 @@ def timed_operation(tp_logger: TPLogger, action: str, **log_kwargs):
             **log_kwargs,
         )
         raise
+
+
+def upload_to_athena() -> bool:
+    """
+    Upload data from local DuckDB to AWS Athena.
+
+    Reads logs from the local DuckDB and uploads them to Athena using the
+    configuration parameters set in LoggerConfig.
+
+    Returns:
+        bool: True if successful, False otherwise
+
+    Raises:
+        ValueError: If Athena configuration is not properly set
+    """
+    config = get_config()
+
+    if not config.athena_destination:
+        raise ValueError("athena_destination must be True to upload to Athena")
+
+    # Validate required Athena configuration
+    if not all(
+        [config.aws_region, config.athena_database, config.athena_s3_staging_bucket]
+    ):
+        raise ValueError(
+            "aws_region, athena_database, and athena_s3_staging_bucket are required for Athena upload"
+        )
+
+    try:
+        # Source pipeline: Read from local DuckDB
+        duckdb_pipeline = dlt.pipeline(
+            pipeline_name=config.pipeline_name,
+            dataset_name=config.dataset_name,
+            destination=dlt.destinations.duckdb(
+                credentials=f"duckdb:///{config.db_path}"
+            ),
+            progress="enlighten",
+        )
+
+        # Destination pipeline: Write to Athena
+        athena_destination = dlt.destinations.athena(
+            aws_region=config.aws_region,
+            athena_database=config.athena_database,
+            s3_staging_bucket=config.athena_s3_staging_bucket,
+        )
+
+        final_pipeline = dlt.pipeline(
+            pipeline_name=f"athena_upload_pipeline_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            dataset_name=config.dataset_name,
+            destination=athena_destination,
+            progress="enlighten",
+            staging="filesystem",
+        )
+
+        # Get dataset from DuckDB
+        duckdb_dataset = duckdb_pipeline.dataset()
+
+        # Upload each table to Athena
+        for table_name in duckdb_dataset.schema.tables.keys():
+            if table_name.startswith("_dlt"):
+                continue  # Skip DLT internal tables
+
+            try:
+                logger.info(f"Uploading table {table_name} to Athena")
+
+                final_pipeline.run(
+                    duckdb_dataset[table_name].arrow(),
+                    table_name=table_name,
+                    table_format="iceberg",
+                    primary_key="_dlt_id",
+                )
+
+                logger.info(f"Successfully uploaded table {table_name} to Athena")
+
+            except Exception as e:
+                logger.error(f"Error uploading table {table_name} to Athena: {str(e)}")
+                return False
+
+        logger.info("Successfully completed Athena upload")
+        return True
+
+    except Exception as e:
+        logger.error(f"Error during Athena upload: {str(e)}")
+        return False

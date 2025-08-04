@@ -5,7 +5,8 @@ from .core import (
     get_logger,
     log_execution,
     timed_operation,
-    TPLogger
+    TPLogger,
+    upload_to_athena,
 )
 from .models import LogEntry
 from .config import LoggerConfig
@@ -16,10 +17,11 @@ __author__ = "Joan Claverol"
 # Main exports for easy import
 __all__ = [
     "setup_logging",
-    "get_logger", 
+    "get_logger",
     "log_execution",
     "timed_operation",
     "TPLogger",
+    "upload_to_athena",
     "LogEntry",
-    "LoggerConfig"
+    "LoggerConfig",
 ]

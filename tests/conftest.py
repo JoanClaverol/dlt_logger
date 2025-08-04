@@ -25,7 +25,7 @@ def test_config(temp_db_path):
         log_level="DEBUG",
         console_logging=False,  # Disable console logging for tests
         dataset_name="test_logs",
-        pipeline_name="test_pipeline"
+        pipeline_name="test_pipeline",
     )
     return config
 
@@ -36,12 +36,12 @@ def setup_test_logging(test_config):
     # Store original config
     global _config
     original_config = _config
-    
+
     # Set test config
     set_config(test_config)
-    
+
     yield test_config
-    
+
     # Restore original config
     _config = original_config
 
@@ -58,27 +58,29 @@ def sample_log_data():
         "message": "Test message",
         "success": True,
         "duration_ms": 100,
-        "context": {"key": "value"}
+        "context": {"key": "value"},
     }
 
 
 @pytest.fixture
 def mock_dlt_pipeline(monkeypatch):
     """Mock DLT pipeline for testing."""
+
     class MockPipeline:
         def __init__(self, *args, **kwargs):
             self.args = args
             self.kwargs = kwargs
             self.runs = []
-        
+
         def run(self, resource_func):
             """Mock run method that stores data."""
             # If it's a resource function (generator), call it and collect data
-            if hasattr(resource_func, '__call__'):
+            if hasattr(resource_func, "__call__"):
                 try:
                     # Call the resource function with sample data
                     from tp_logger.models import LogEntry
                     from uuid import uuid4
+
                     sample_entries = [LogEntry(project_name="test", run_id=uuid4())]
                     result = list(resource_func(sample_entries))
                     self.runs.extend(result)
@@ -90,10 +92,10 @@ def mock_dlt_pipeline(monkeypatch):
             else:
                 self.runs.append(resource_func)
                 return {"status": "success", "records": 1}
-    
+
     def mock_pipeline(*args, **kwargs):
         return MockPipeline(*args, **kwargs)
-    
+
     monkeypatch.setattr("dlt.pipeline", mock_pipeline)
     return MockPipeline
 
@@ -111,9 +113,10 @@ def reset_global_state():
     """Reset global state before each test."""
     # Reset any global variables in the modules
     from tp_logger import core
+
     core._pipeline = None
-    
+
     yield
-    
+
     # Clean up after test
     core._pipeline = None
