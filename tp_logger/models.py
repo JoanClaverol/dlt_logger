@@ -26,16 +26,18 @@ class LogEntry(BaseModel):
     request_method: Optional[str] = None
     context: Dict[str, Any] = Field(default_factory=dict)
     
-    @field_validator('context')
+    @field_validator('context', mode='before')
     @classmethod
     def validate_context(cls, v):
         """Ensure context is JSON serializable."""
+        if v is None or v == "":
+            return {}
         if isinstance(v, str):
             try:
                 return json.loads(v)
             except json.JSONDecodeError:
                 return {"raw": v}
-        return v or {}
+        return v
     
     class Config:
         """Pydantic configuration."""

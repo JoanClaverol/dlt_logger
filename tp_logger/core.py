@@ -51,7 +51,7 @@ def get_pipeline() -> dlt.Pipeline:
         _pipeline = dlt.pipeline(
             pipeline_name=config.pipeline_name,
             destination="duckdb",
-            dataset_name="tp_logger_logs"
+            dataset_name=config.dataset_name
         )
     return _pipeline
 
@@ -189,29 +189,30 @@ class TPLogger:
         )
 
 
-def setup_logging(
-    project_name: str = "tp_logger_app",
-    db_path: str = "./logs/app.duckdb",
-    log_level: str = "INFO",
-    console_logging: bool = True
-):
-    """Setup tp-logger with the given configuration."""
+def setup_logging(**kwargs):
+    """Setup tp-logger with the given configuration.
+    
+    Args:
+        project_name (str): Name of your project
+        db_path (str): Path to DuckDB file  
+        log_level (str): Minimum log level
+        console_logging (bool): Enable console output
+        dataset_name (str): DLT dataset name
+        pipeline_name (str): DLT pipeline name
+        
+    All parameters are optional and will use defaults from config.py if not provided.
+    """
     global _pipeline
     
-    # Create configuration using the config module
-    config = LoggerConfig(
-        project_name=project_name,
-        db_path=db_path,
-        log_level=log_level,
-        console_logging=console_logging
-    )
+    # Create configuration using the config module with provided parameters
+    config = LoggerConfig(**kwargs)
     set_config(config)
     
     # Reset pipeline to use new config
     _pipeline = None
     
     # Setup console logging
-    if console_logging:
+    if config.console_logging:
         setup_console_logging()
 
 
