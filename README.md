@@ -31,24 +31,24 @@ Install the latest development version directly from GitHub:
 
 ```bash
 # Using pip
-pip install git+https://github.com/yourusername/tp_logger.git
+pip install git+https://github.com/JoanClaverol/tp_logger.git
 
 # Using uv (recommended)
-uv add git+https://github.com/yourusername/tp_logger.git
+uv add git+https://github.com/JoanClaverol/tp_logger.git
 ```
 
 #### Install Specific Version/Branch/Tag
 
 ```bash
 # Install specific branch
-uv add git+https://github.com/yourusername/tp_logger.git@main
-uv add git+https://github.com/yourusername/tp_logger.git@development
+uv add git+https://github.com/JoanClaverol/tp_logger.git@main
+uv add git+https://github.com/JoanClaverol/tp_logger.git@development
 
 # Install specific tag/release
-uv add git+https://github.com/yourusername/tp_logger.git@v0.1.0
+uv add git+https://github.com/JoanClaverol/tp_logger.git@v0.1.0
 
 # Install specific commit
-uv add git+https://github.com/yourusername/tp_logger.git@abc1234
+uv add git+https://github.com/JoanClaverol/tp_logger.git@abc1234
 ```
 
 #### For Development
@@ -57,7 +57,7 @@ If you want to contribute or modify the library:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/tp_logger.git
+git clone https://github.com/JoanClaverol/tp_logger.git
 cd tp_logger
 
 # Install in development mode with uv
