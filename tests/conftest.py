@@ -112,11 +112,11 @@ def db_connection(temp_db_path):
 def reset_global_state():
     """Reset global state before each test."""
     # Reset any global variables in the modules
-    from tp_logger import core
+    from tp_logger import pipeline
 
-    core._pipeline = None
+    pipeline._pipeline = None
 
     yield
 
     # Clean up after test
-    core._pipeline = None
+    pipeline._pipeline = None

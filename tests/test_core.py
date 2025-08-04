@@ -45,14 +45,14 @@ class TestSetupLogging:
         assert config.log_level == "INFO"
         assert config.console_logging is True
 
-    @patch("tp_logger.core.setup_console_logging")
+    @patch("tp_logger.logger.setup_console_logging")
     def test_setup_logging_console_enabled(self, mock_setup_console, temp_db_path):
         """Test that console logging is setup when enabled."""
         setup_logging(project_name="test_project", console_logging=True)
 
         mock_setup_console.assert_called_once()
 
-    @patch("tp_logger.core.setup_console_logging")
+    @patch("tp_logger.logger.setup_console_logging")
     def test_setup_logging_console_disabled(self, mock_setup_console, temp_db_path):
         """Test that console logging is not setup when disabled."""
         setup_logging(project_name="test_project", console_logging=False)
@@ -352,9 +352,9 @@ class TestUploadToAthena:
         ):
             upload_to_athena()
 
-    @patch("tp_logger.core.dlt.pipeline")
-    @patch("tp_logger.core.dlt.destinations.athena")
-    @patch("tp_logger.core.dlt.destinations.duckdb")
+    @patch("tp_logger.athena.dlt.pipeline")
+    @patch("tp_logger.athena.dlt.destinations.athena")
+    @patch("tp_logger.athena.dlt.destinations.duckdb")
     def test_upload_to_athena_success(
         self, mock_duckdb_dest, mock_athena_dest, mock_pipeline, setup_test_logging
     ):
@@ -387,7 +387,7 @@ class TestUploadToAthena:
         assert mock_pipeline.call_count == 2
         mock_athena_pipeline.run.assert_called_once()
 
-    @patch("tp_logger.core.dlt.pipeline")
+    @patch("tp_logger.athena.dlt.pipeline")
     def test_upload_to_athena_pipeline_error(self, mock_pipeline, setup_test_logging):
         """Test upload_to_athena when pipeline creation fails."""
         # Setup config
@@ -404,9 +404,9 @@ class TestUploadToAthena:
 
         assert result is False
 
-    @patch("tp_logger.core.dlt.pipeline")
-    @patch("tp_logger.core.dlt.destinations.athena")
-    @patch("tp_logger.core.dlt.destinations.duckdb")
+    @patch("tp_logger.athena.dlt.pipeline")
+    @patch("tp_logger.athena.dlt.destinations.athena")
+    @patch("tp_logger.athena.dlt.destinations.duckdb")
     def test_upload_to_athena_upload_error(
         self, mock_duckdb_dest, mock_athena_dest, mock_pipeline, setup_test_logging
     ):
@@ -440,9 +440,9 @@ class TestUploadToAthena:
 
         assert result is False
 
-    @patch("tp_logger.core.dlt.pipeline")
-    @patch("tp_logger.core.dlt.destinations.athena")
-    @patch("tp_logger.core.dlt.destinations.duckdb")
+    @patch("tp_logger.athena.dlt.pipeline")
+    @patch("tp_logger.athena.dlt.destinations.athena")
+    @patch("tp_logger.athena.dlt.destinations.duckdb")
     def test_upload_to_athena_skips_dlt_tables(
         self, mock_duckdb_dest, mock_athena_dest, mock_pipeline, setup_test_logging
     ):
