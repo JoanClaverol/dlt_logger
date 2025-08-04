@@ -1,31 +1,25 @@
-"""Core logging functionality for tp-logger."""
+"""Core logging functionality for tp-logger using DLT Hub."""
 
-import json
-import os
 import sys
 import time
-import uuid
 import logging
 from functools import wraps
 from contextlib import contextmanager
-from typing import Optional, Dict, Any, Callable
+from typing import Optional, Dict, Any, Callable, List
+from uuid import uuid4
 
-import duckdb
+import dlt
 from loguru import logger
 
-from .config import get_config
+from .models import LogEntry
+from .config import get_config, set_config, LoggerConfig
 
+
+# Global pipeline instance
+_pipeline: Optional[dlt.Pipeline] = None
 
 # Generate a unique run ID for this session
-RUN_ID = str(uuid.uuid4())
-
-# Database connection
-_db_connection: Optional[duckdb.DuckDBPyConnection] = None
-
-
-def _get_tracing_id() -> str:
-    """Generate a tracing ID for this session."""
-    return str(uuid.uuid4())[:8]
+RUN_ID = uuid4()
 
 
 class InterceptHandler(logging.Handler):
@@ -49,81 +43,57 @@ class InterceptHandler(logging.Handler):
         )
 
 
-def get_db_connection(max_retries: int = 3) -> Optional[duckdb.DuckDBPyConnection]:
-    """Get or create database connection with retry logic."""
-    global _db_connection
-    
-    if _db_connection is None:
+def get_pipeline() -> dlt.Pipeline:
+    """Get or create the DLT pipeline."""
+    global _pipeline
+    if _pipeline is None:
         config = get_config()
-        db_path = config.db_path
-        
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
-        
-        for attempt in range(max_retries):
-            try:
-                _db_connection = duckdb.connect(db_path)
-                _ensure_job_logs_table()
-                if attempt > 0:
-                    print(f"Connected to database on attempt {attempt + 1}")
-                break
-            except Exception as e:
-                if "lock" in str(e).lower() and attempt < max_retries - 1:
-                    wait_time = 2 ** attempt
-                    print(f"Database locked, retrying in {wait_time}s")
-                    time.sleep(wait_time)
-                    continue
-                else:
-                    print(f"Database connection failed: {e}")
-                    _db_connection = None
-                    break
-    
-    return _db_connection
+        _pipeline = dlt.pipeline(
+            pipeline_name=config.pipeline_name,
+            destination="duckdb",
+            dataset_name="tp_logger_logs"
+        )
+    return _pipeline
 
 
-def _ensure_job_logs_table():
-    """Ensure the job_logs table exists."""
-    global _db_connection
-    if _db_connection is None:
-        return
-
-    try:
-        create_table_sql = """
-        CREATE TABLE IF NOT EXISTS job_logs (
-            id                UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
-            project_name      TEXT            NOT NULL,
-            module_name       TEXT,
-            function_name     TEXT,
-            run_id            UUID            NOT NULL,
-            timestamp         TIMESTAMPTZ     NOT NULL DEFAULT now(),
-            level             TEXT            NOT NULL CHECK (level IN (
-                               'DEBUG','INFO','WARNING','ERROR','CRITICAL'
-                             )) DEFAULT 'INFO',
-            action            TEXT,
-            message           TEXT,
-            success           BOOLEAN,
-            status_code       INT,
-            duration_ms       BIGINT,
-            request_method    TEXT,
-            context           JSON DEFAULT '{}'
-        );
-        """
-        _db_connection.execute(create_table_sql)
-    except Exception as e:
-        print(f"Failed to create job_logs table: {e}")
+@dlt.resource(
+    write_disposition="append",
+    columns={
+        "id": {"data_type": "text"},
+        "project_name": {"data_type": "text"},
+        "module_name": {"data_type": "text"},
+        "function_name": {"data_type": "text"},
+        "run_id": {"data_type": "text"},
+        "timestamp": {"data_type": "timestamp"},
+        "level": {"data_type": "text"},
+        "action": {"data_type": "text"},
+        "message": {"data_type": "text"},
+        "success": {"data_type": "bool"},
+        "status_code": {"data_type": "bigint"},
+        "duration_ms": {"data_type": "bigint"},
+        "request_method": {"data_type": "text"},
+        "context": {"data_type": "json"},
+    }
+)
+def job_logs(log_entries: List[LogEntry]):
+    """DLT resource for job logs."""
+    for entry in log_entries:
+        yield entry.model_dump()
 
 
 class TPLogger:
-    """Main logger class for tp-logger."""
+    """Main logger class for tp-logger using DLT."""
     
     def __init__(self, module_name: str):
         self.module_name = module_name
         self.config = get_config()
-        self.tracing_id = _get_tracing_id()
-        self.connection = get_db_connection()
-        self.loguru_logger = logger.bind(tracing_id=self.tracing_id, name=module_name)
+        self.pipeline = get_pipeline()
+        self.loguru_logger = logger.bind(name=module_name)
+        
+        # Buffer for batch writes (optional optimization)
+        self._log_buffer: List[LogEntry] = []
     
-    def _log_to_db(
+    def _create_log_entry(
         self,
         level: str,
         message: str,
@@ -134,39 +104,30 @@ class TPLogger:
         duration_ms: Optional[int] = None,
         request_method: Optional[str] = None,
         context: Optional[Dict[str, Any]] = None,
-    ):
-        """Log entry to database."""
-        if not self.connection:
-            return
-        
+    ) -> LogEntry:
+        """Create a LogEntry model."""
+        return LogEntry(
+            project_name=self.config.project_name,
+            module_name=self.module_name,
+            function_name=function_name,
+            run_id=RUN_ID,
+            level=level,
+            action=action,
+            message=message,
+            success=success,
+            status_code=status_code,
+            duration_ms=duration_ms,
+            request_method=request_method,
+            context=context or {}
+        )
+    
+    def _log_to_dlt(self, log_entry: LogEntry):
+        """Log entry using DLT."""
         try:
-            insert_sql = """
-            INSERT INTO job_logs (
-                project_name, module_name, function_name, run_id, level,
-                action, message, success, status_code, duration_ms,
-                request_method, context
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """
-            
-            self.connection.execute(
-                insert_sql,
-                [
-                    self.config.project_name,
-                    self.module_name,
-                    function_name,
-                    RUN_ID,
-                    level,
-                    action,
-                    message,
-                    success,
-                    status_code,
-                    duration_ms,
-                    request_method,
-                    json.dumps(context or {}),
-                ],
-            )
+            # Run the pipeline with the log entry
+            self.pipeline.run(job_logs([log_entry]))
         except Exception as e:
-            print(f"Database logging failed: {e}")
+            print(f"DLT logging failed: {e}")
     
     def _log(self, level: str, message: str, **kwargs):
         """Internal logging method."""
@@ -174,8 +135,9 @@ class TPLogger:
         if self.config.console_logging:
             getattr(self.loguru_logger, level.lower())(message)
         
-        # Database logging
-        self._log_to_db(level=level.upper(), message=message, **kwargs)
+        # Create log entry and store via DLT
+        log_entry = self._create_log_entry(level=level.upper(), message=message, **kwargs)
+        self._log_to_dlt(log_entry)
     
     def debug(self, message: str, **kwargs):
         self._log("DEBUG", message, **kwargs)
@@ -225,6 +187,56 @@ class TPLogger:
             success=False,
             context={"exception_type": type(exception).__name__},
         )
+
+
+def setup_logging(
+    project_name: str = "tp_logger_app",
+    db_path: str = "./logs/app.duckdb",
+    log_level: str = "INFO",
+    console_logging: bool = True
+):
+    """Setup tp-logger with the given configuration."""
+    global _pipeline
+    
+    # Create configuration using the config module
+    config = LoggerConfig(
+        project_name=project_name,
+        db_path=db_path,
+        log_level=log_level,
+        console_logging=console_logging
+    )
+    set_config(config)
+    
+    # Reset pipeline to use new config
+    _pipeline = None
+    
+    # Setup console logging
+    if console_logging:
+        setup_console_logging()
+
+
+def setup_console_logging():
+    """Setup console logging with loguru."""
+    config = get_config()
+    
+    if not config.console_logging:
+        return
+    
+    # Configure loguru
+    logger.remove()
+    log_format = (
+        "<green>{time:YYYY-MM-DD HH:mm:ss.SSS Z}</green> | "
+        "<level>{level: <8}</level> | "
+        "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+    )
+    logger.add(sys.stdout, format=log_format, level=config.log_level)
+    
+    # Setup intercept handler for standard logging
+    root_logger = logging.getLogger()
+    root_logger.handlers = []
+    root_logger.addHandler(InterceptHandler())
+    root_logger.setLevel(getattr(logging, config.log_level))
+    root_logger.propagate = False
 
 
 def get_logger(name: str) -> TPLogger:
@@ -311,27 +323,3 @@ def timed_operation(tp_logger: TPLogger, action: str, **log_kwargs):
             **log_kwargs,
         )
         raise
-
-
-def setup_console_logging():
-    """Setup console logging with loguru."""
-    config = get_config()
-    
-    if not config.console_logging:
-        return
-    
-    # Configure loguru
-    logger.remove()
-    log_format = (
-        "<green>{time:YYYY-MM-DD HH:mm:ss.SSS Z}</green> | "
-        "<level>{level: <8}</level> | "
-        "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
-    )
-    logger.add(sys.stdout, format=log_format, level=config.log_level)
-    
-    # Setup intercept handler for standard logging
-    root_logger = logging.getLogger()
-    root_logger.handlers = []
-    root_logger.addHandler(InterceptHandler())
-    root_logger.setLevel(getattr(logging, config.log_level))
-    root_logger.propagate = False
