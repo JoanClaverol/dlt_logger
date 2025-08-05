@@ -3,7 +3,7 @@
 import dlt
 import duckdb
 import os
-from typing import Iterator, Dict, Any
+from typing import Iterator, Dict, Any, List
 
 from ..setup import get_config
 from .columns_schema import JOB_LOGS_COLUMNS
@@ -24,7 +24,7 @@ def _get_logger():
 )
 def job_logs_resource(
     db_path: str, dataset_name: str, batch_size: int = 10000
-) -> Iterator[Dict[str, Any]]:
+) -> Iterator[List[Dict[str, Any]]]:
     """
     A DLT resource that reads job logs from the source DuckDB database in batches.
     Uses batch processing and parallelization for improved performance.
