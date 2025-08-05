@@ -6,6 +6,7 @@ import os
 from typing import Iterator, Dict, Any
 
 from ..setup import get_config
+from .columns_schema import JOB_LOGS_COLUMNS
 
 
 def _get_logger():
@@ -14,7 +15,7 @@ def _get_logger():
     return get_logger("athena")
 
 
-@dlt.resource(name="job_logs", write_disposition="replace")
+@dlt.resource(name="job_logs", write_disposition="append", columns=JOB_LOGS_COLUMNS)
 def job_logs_resource(db_path: str, dataset_name: str) -> Iterator[Dict[str, Any]]:
     """
     A DLT resource that reads all job logs from the source DuckDB database.

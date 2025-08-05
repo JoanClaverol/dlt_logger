@@ -7,6 +7,7 @@ import dlt
 
 from ..logging.models import LogEntry
 from ..setup import get_config
+from .columns_schema import JOB_LOGS_COLUMNS
 
 
 # Global pipeline instance
@@ -56,23 +57,8 @@ def get_pipeline() -> dlt.Pipeline:
 
 
 @dlt.resource(
-    write_disposition="append",
-    columns={
-        "id": {"data_type": "text"},
-        "project_name": {"data_type": "text"},
-        "module_name": {"data_type": "text"},
-        "function_name": {"data_type": "text"},
-        "run_id": {"data_type": "text"},
-        "timestamp": {"data_type": "timestamp"},
-        "level": {"data_type": "text"},
-        "action": {"data_type": "text"},
-        "message": {"data_type": "text"},
-        "success": {"data_type": "bool"},
-        "status_code": {"data_type": "bigint"},
-        "duration_ms": {"data_type": "bigint"},
-        "request_method": {"data_type": "text"},
-        "context": {"data_type": "json"},
-    },
+    write_disposition="replace",
+    columns=JOB_LOGS_COLUMNS,
 )
 def job_logs(log_entries: List[LogEntry]):
     """DLT resource for job logs."""
