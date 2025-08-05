@@ -43,7 +43,12 @@ from .logging import (
 )
 from .orchestrator import WorkflowManager
 from .setup import LoggerConfig
-from .utils import generate_sample_log_data, get_database_info_from_config
+from .utils import (
+    detect_project_root,
+    generate_sample_log_data,
+    get_database_info_from_config,
+    resolve_project_path,
+)
 
 __version__ = "0.1.0"
 __author__ = "Joan Claverol"
@@ -58,6 +63,8 @@ __all__ = [
     "LogEntry",
     "LoggerConfig",
     "WorkflowManager",
+    "detect_project_root",
     "generate_sample_log_data",
     "get_database_info_from_config",
+    "resolve_project_path",
 ]

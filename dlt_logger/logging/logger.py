@@ -1,6 +1,6 @@
 """Core TPLogger class for dlt-logger."""
 
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Literal, Optional
 
 from loguru import logger
 
@@ -46,7 +46,7 @@ class TPLogger:
         status_code: Optional[int] = None,
         duration_ms: Optional[int] = None,
         request_method: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None,
+        context: Optional[dict[str, Any]] = None,
     ) -> LogEntry:
         """Create a LogEntry model."""
         return LogEntry(
@@ -111,7 +111,7 @@ class TPLogger:
             Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         ] = None,
         duration_ms: Optional[int] = None,
-        context: Optional[Dict[str, Any]] = None,
+        context: Optional[dict[str, Any]] = None,
         **kwargs,
     ):
         """Log a specific action with structured metadata.

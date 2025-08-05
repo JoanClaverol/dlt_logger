@@ -2,7 +2,7 @@
 
 import time
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from ..dlt import transfer_to_athena
 from ..logging import get_logger, setup_logging
@@ -189,7 +189,7 @@ class WorkflowManager:
             self.logger.error(f"[WORKFLOW] Exception details: {repr(e)}")
             return False
 
-    def run_complete_workflow(self, sample_log_count: int = 10) -> Dict[str, Any]:
+    def run_complete_workflow(self, sample_log_count: int = 10) -> dict[str, Any]:
         """Run the complete workflow from setup to transfer."""
         workflow_start = time.time()
         results = {
@@ -264,7 +264,7 @@ class WorkflowManager:
 
         return results
 
-    def get_workflow_summary(self) -> Dict[str, Any]:
+    def get_workflow_summary(self) -> dict[str, Any]:
         """Get a summary of the current workflow configuration."""
         return {
             "project_name": self.config.project_name,

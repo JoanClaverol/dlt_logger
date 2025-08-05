@@ -38,19 +38,25 @@ Usage Examples:
 """
 
 from .helpers import (
+    detect_project_root,
     ensure_directory_exists,
+    find_project_root_from_path,
     format_duration,
     generate_sample_log_data,
     get_database_info,
     get_database_info_from_config,
+    resolve_project_path,
     sanitize_context,
 )
 
 __all__ = [
+    "detect_project_root",
     "ensure_directory_exists",
+    "find_project_root_from_path",
     "format_duration",
-    "sanitize_context",
     "generate_sample_log_data",
     "get_database_info",
     "get_database_info_from_config",
+    "resolve_project_path",
+    "sanitize_context",
 ]

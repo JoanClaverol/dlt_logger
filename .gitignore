@@ -36,3 +36,4 @@ Thumbs.db
 
 # ignore .dlt
 .dlt
+.dlt_pipeline

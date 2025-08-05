@@ -2,7 +2,7 @@
 
 import json
 from datetime import datetime
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Literal, Optional
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, field_validator
@@ -24,7 +24,7 @@ class LogEntry(BaseModel):
     status_code: Optional[int] = None
     duration_ms: Optional[int] = None
     request_method: Optional[str] = None
-    context: Dict[str, Any] = Field(default_factory=dict)
+    context: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("context", mode="before")
     @classmethod

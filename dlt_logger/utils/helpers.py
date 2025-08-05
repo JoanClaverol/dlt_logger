@@ -1,7 +1,9 @@
 """Utility functions and helpers for tp-logger."""
 
+import inspect
 import os
-from typing import Any, Dict, List, Optional
+from pathlib import Path
+from typing import Any, Optional
 
 
 def ensure_directory_exists(path: str) -> None:
@@ -26,7 +28,7 @@ def format_duration(duration_ms: Optional[int]) -> str:
         return f"{minutes}m {seconds:.2f}s"
 
 
-def sanitize_context(context: Dict[str, Any]) -> Dict[str, Any]:
+def sanitize_context(context: dict[str, Any]) -> dict[str, Any]:
     """Sanitize context dictionary by removing or masking sensitive data.
 
     Identifies and redacts potentially sensitive information like passwords,
@@ -72,7 +74,7 @@ def sanitize_context(context: Dict[str, Any]) -> Dict[str, Any]:
     return sanitized
 
 
-def generate_sample_log_data(count: int = 10) -> List[Dict[str, Any]]:
+def generate_sample_log_data(count: int = 10) -> list[dict[str, Any]]:
     """Generate sample log data for testing and demonstration purposes.
 
     Creates realistic log entries with random actions, success/failure outcomes,
@@ -107,7 +109,7 @@ def generate_sample_log_data(count: int = 10) -> List[Dict[str, Any]]:
     levels = ["INFO", "WARNING", "ERROR", "DEBUG"]
 
     sample_data = []
-    for i in range(count):
+    for _i in range(count):
         action = random.choice(actions)
         success = random.choice(statuses)
         level = "ERROR" if not success else random.choice(levels)
@@ -131,7 +133,7 @@ def generate_sample_log_data(count: int = 10) -> List[Dict[str, Any]]:
 
 def get_database_info(
     db_path: str, dataset_name: str, table_name: str = "job_logs"
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Get information about the DuckDB database.
 
     Args:
@@ -179,7 +181,7 @@ def get_database_info(
         }
 
 
-def get_database_info_from_config() -> Dict[str, Any]:
+def get_database_info_from_config() -> dict[str, Any]:
     """Get database info using values from the current configuration."""
     from ..setup import get_config
 
@@ -189,3 +191,124 @@ def get_database_info_from_config() -> Dict[str, Any]:
         dataset_name=config.dataset_name,
         table_name="job_logs",  # This could also be made configurable in LoggerConfig if needed
     )
+
+
+def detect_project_root(caller_frame_depth: int = 3) -> str:
+    """Detect the project root directory from the calling code.
+
+    This function inspects the call stack to find where dlt_logger was called from
+    and attempts to detect the project root directory by looking for common project
+    indicators like pyproject.toml, setup.py, requirements.txt, or .git directory.
+
+    Args:
+        caller_frame_depth (int): How many frames up the stack to look for the caller.
+                                 Default is 3 (typically the user's code calling setup_logging).
+
+    Returns:
+        str: Absolute path to the detected project root directory.
+             Falls back to current working directory if detection fails.
+
+    Example:
+        >>> # Called from user's project at /home/user/myproject/main.py
+        >>> root = detect_project_root()
+        >>> print(root)  # '/home/user/myproject'
+    """
+    try:
+        # Get the caller's frame
+        frame = inspect.currentframe()
+        for _ in range(caller_frame_depth):
+            if frame is None:
+                break
+            frame = frame.f_back
+
+        if frame is None:
+            return os.getcwd()
+
+        # Get the file path of the caller
+        caller_file = frame.f_code.co_filename
+        caller_dir = os.path.dirname(os.path.abspath(caller_file))
+
+        # Walk up the directory tree looking for project root indicators
+        project_root = find_project_root_from_path(caller_dir)
+        return project_root
+
+    except Exception:
+        # Fallback to current working directory
+        return os.getcwd()
+
+
+def find_project_root_from_path(start_path: str) -> str:
+    """Find the project root by walking up from a starting path.
+
+    Looks for common project indicators in each parent directory:
+    - pyproject.toml (Python projects using modern standards)
+    - setup.py (traditional Python projects)
+    - requirements.txt (pip-based projects)
+    - .git (Git repositories)
+    - Cargo.toml (Rust projects)
+    - package.json (Node.js projects)
+
+    Args:
+        start_path (str): Directory path to start searching from.
+
+    Returns:
+        str: Absolute path to the project root, or start_path if no indicators found.
+    """
+    project_indicators = [
+        'pyproject.toml',
+        'setup.py',
+        'requirements.txt',
+        '.git',
+        'Cargo.toml',
+        'package.json',
+        'go.mod',
+        'Dockerfile',
+        '.gitignore'
+    ]
+
+    current_path = Path(start_path).resolve()
+
+    # Walk up the directory tree
+    for path in [current_path] + list(current_path.parents):
+        # Check if any project indicators exist in this directory
+        for indicator in project_indicators:
+            if (path / indicator).exists():
+                return str(path)
+
+    # If no indicators found, return the starting path
+    return start_path
+
+
+def resolve_project_path(relative_path: str, project_root: Optional[str] = None) -> str:
+    """Resolve a relative path to an absolute path based on project root.
+
+    Converts relative paths to absolute paths using the project root as the base.
+    If the path is already absolute, returns it unchanged.
+
+    Args:
+        relative_path (str): The path to resolve (relative or absolute).
+        project_root (str, optional): Base directory for relative paths.
+                                    If None, auto-detects project root.
+
+    Returns:
+        str: Absolute path resolved from the project root.
+
+    Example:
+        >>> # If project root is '/home/user/myproject'
+        >>> path = resolve_project_path('./logs/app.db')
+        >>> print(path)  # '/home/user/myproject/logs/app.db'
+        >>>
+        >>> # Absolute paths are returned unchanged
+        >>> path = resolve_project_path('/tmp/logs.db')
+        >>> print(path)  # '/tmp/logs.db'
+    """
+    # If already absolute, return as-is
+    if os.path.isabs(relative_path):
+        return relative_path
+
+    # Get project root if not provided
+    if project_root is None:
+        project_root = detect_project_root(caller_frame_depth=4)  # Go one frame deeper
+
+    # Resolve relative to project root
+    return os.path.abspath(os.path.join(project_root, relative_path))

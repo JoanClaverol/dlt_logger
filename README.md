@@ -275,6 +275,40 @@ config = LoggerConfig(
 dlt_logger.setup_logging(**config.__dict__)
 ```
 
+### Project Root Detection
+
+**New in v0.1.0**: dlt-logger automatically detects your project's root directory and creates all files relative to it, ensuring clean project organization when installed as a dependency.
+
+**How it works:**
+- Automatically detects project root by looking for `pyproject.toml`, `setup.py`, `.git`, or other project indicators
+- Creates database files and DLT pipeline directories relative to your project root
+- Works seamlessly when installed via `pip install git+https://github.com/...`
+
+**Path Resolution Examples:**
+```python
+# All paths are resolved relative to your project root
+dlt_logger.setup_logging(
+    project_name="my_app",
+    db_path="./logs/app.duckdb"  # Creates: /your/project/logs/app.duckdb
+)
+
+# Manual project root override (if needed)
+dlt_logger.setup_logging(
+    project_name="my_app", 
+    db_path="./logs/app.duckdb",
+    project_root="/custom/project/path"
+)
+
+# Test project root detection
+project_root = dlt_logger.detect_project_root()
+print(f"Detected project root: {project_root}")
+```
+
+**What gets created in your project:**
+- `./logs/` - Database files (configurable path)
+- `./.dlt_pipeline/` - DLT pipeline state and configuration
+- No more files scattered in unexpected locations!
+
 ### Environment Variables
 
 Override settings with environment variables:

@@ -2,7 +2,7 @@
 
 import os
 from collections.abc import Iterator
-from typing import Any, Dict, List
+from typing import Any
 
 import dlt
 import duckdb
@@ -26,7 +26,7 @@ def _get_logger():
 )
 def job_logs_resource(
     db_path: str, dataset_name: str, batch_size: int = 10000
-) -> Iterator[List[Dict[str, Any]]]:
+) -> Iterator[list[dict[str, Any]]]:
     """
     A DLT resource that reads job logs from the source DuckDB database in batches.
     Uses batch processing and parallelization for improved performance.
@@ -40,7 +40,7 @@ def job_logs_resource(
     with duckdb.connect(db_path, read_only=True) as conn:
         # Query all columns from the job_logs table without expensive ORDER BY
         query = f"""
-        SELECT 
+        SELECT
             *
         FROM {dataset_name}.job_logs
         """

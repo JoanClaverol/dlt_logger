@@ -3,6 +3,8 @@
 import os
 from typing import Optional
 
+from ..utils.helpers import detect_project_root, resolve_project_path
+
 
 class LoggerConfig:
     """Configuration class for dlt-logger."""
@@ -23,9 +25,9 @@ class LoggerConfig:
         aws_region: Optional[str] = None,
         athena_database: Optional[str] = None,
         athena_s3_staging_bucket: Optional[str] = None,
+        project_root: Optional[str] = None,
     ):
         self.project_name = project_name
-        self.db_path = db_path or "./logs/app.duckdb"
         self.log_level = log_level.upper()
         self.console_logging = console_logging
         self.pipeline_name = pipeline_name
@@ -38,6 +40,17 @@ class LoggerConfig:
         self.aws_region = aws_region
         self.athena_database = athena_database
         self.athena_s3_staging_bucket = athena_s3_staging_bucket
+
+        # Auto-detect project root if not provided
+        if project_root is None:
+            self.project_root = detect_project_root(caller_frame_depth=4)
+        else:
+            self.project_root = os.path.abspath(project_root)
+
+        # Resolve database path relative to project root
+        if db_path is None:
+            db_path = "./logs/app.duckdb"
+        self.db_path = resolve_project_path(db_path, self.project_root)
 
         # Validate S3 configuration
         if self.sync_to_s3 and not self.aws_s3_bucket:

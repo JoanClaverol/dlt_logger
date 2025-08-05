@@ -1,6 +1,6 @@
 """Pipeline management for tp-logger using DLT Hub."""
 
-from typing import List, Optional
+from typing import Optional
 from uuid import uuid4
 
 import dlt
@@ -37,15 +37,22 @@ def get_pipeline() -> dlt.Pipeline:
             os.makedirs(db_dir, exist_ok=True)
 
         try:
+            # Set DLT working directory to be relative to the project root
+            # This ensures .dlt folder is created in the right place
+            dlt_working_dir = os.path.join(config.project_root, ".dlt_pipeline")
+            os.makedirs(dlt_working_dir, exist_ok=True)
+
             _pipeline = dlt.pipeline(
                 pipeline_name=config.pipeline_name,
                 destination=dlt.destinations.duckdb(
                     credentials=f"duckdb:///{config.db_path}"
                 ),
                 dataset_name=config.dataset_name,
+                pipelines_dir=dlt_working_dir,
             )
             print("[PIPELINE] Pipeline created successfully")
             print(f"[PIPELINE] Pipeline working directory: {_pipeline.working_dir}")
+            print(f"[PIPELINE] Project root: {config.project_root}")
         except Exception as e:
             print(f"[PIPELINE] Failed to create pipeline: {type(e).__name__}: {str(e)}")
             raise
@@ -60,7 +67,7 @@ def get_pipeline() -> dlt.Pipeline:
     write_disposition="append",
     columns=JOB_LOGS_COLUMNS,
 )
-def job_logs(log_entries: List[LogEntry]):
+def job_logs(log_entries: list[LogEntry]):
     """DLT resource for job logs."""
     for entry in log_entries:
         yield entry.model_dump()
