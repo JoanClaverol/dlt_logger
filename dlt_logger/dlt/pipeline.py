@@ -57,7 +57,7 @@ def get_pipeline() -> dlt.Pipeline:
 
 
 @dlt.resource(
-    write_disposition="replace",
+    write_disposition="append",
     columns=JOB_LOGS_COLUMNS,
 )
 def job_logs(log_entries: List[LogEntry]):
