@@ -7,7 +7,7 @@ from .decorators import log_execution, timed_operation
 # Re-export core logging APIs (DLT operations handled by orchestrator)
 __all__ = [
     "TPLogger",
-    "setup_logging", 
+    "setup_logging",
     "get_logger",
     "log_execution",
     "timed_operation",

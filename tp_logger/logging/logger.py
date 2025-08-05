@@ -1,6 +1,6 @@
 """Core TPLogger class for tp-logger."""
 
-from typing import Optional, Dict, Any, List, Literal
+from typing import Optional, Dict, Any, Literal
 
 from loguru import logger
 
@@ -11,16 +11,30 @@ from .handlers import setup_console_logging
 
 
 class TPLogger:
-    """Main logger class for tp-logger using DLT."""
+    """Main logger class for tp-logger using DLT Hub integration.
+
+    Provides structured logging with automatic storage to DuckDB via DLT pipelines.
+    Supports both simple logging methods (info, warning, error) and advanced
+    action logging with metadata like timing, success status, and context.
+
+    Attributes:
+        module_name (str): Name of the module this logger represents.
+        config (LoggerConfig): Current logging configuration.
+        pipeline (dlt.Pipeline): DLT pipeline for data storage.
+        loguru_logger: Loguru logger instance for console output.
+
+    Example:
+        >>> logger = TPLogger("api_service")
+        >>> logger.info("Request received", action="api_request")
+        >>> logger.log_action("process_data", "Data processed successfully",
+        ...                   success=True, duration_ms=250)
+    """
 
     def __init__(self, module_name: str):
         self.module_name = module_name
         self.config = get_config()
         self.pipeline = get_pipeline()
         self.loguru_logger = logger.bind(name=module_name)
-
-        # Buffer for batch writes (optional optimization)
-        self._log_buffer: List[LogEntry] = []
 
     def _create_log_entry(
         self,
@@ -100,7 +114,29 @@ class TPLogger:
         context: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
-        """Log a specific action with metadata."""
+        """Log a specific action with structured metadata.
+
+        This method is ideal for logging business operations, API calls,
+        database queries, or any action that has a success/failure outcome.
+
+        Args:
+            action (str): Name of the action being performed (e.g., "user_login", "data_export").
+            message (str): Human-readable message describing the action outcome.
+            success (bool, optional): Whether the action succeeded. Defaults to True.
+            level (str, optional): Log level. If None, defaults to "INFO" for success, "ERROR" for failure.
+            duration_ms (int, optional): Action duration in milliseconds.
+            context (dict, optional): Additional structured data about the action.
+            **kwargs: Additional fields to include in the log entry.
+
+        Example:
+            >>> logger.log_action(
+            ...     action="database_query",
+            ...     message="Retrieved user profile",
+            ...     success=True,
+            ...     duration_ms=45,
+            ...     context={"user_id": 123, "table": "users"}
+            ... )
+        """
         if level is None:
             level = "INFO" if success else "ERROR"
 
@@ -128,15 +164,34 @@ class TPLogger:
 def setup_logging(**kwargs):
     """Setup tp-logger with the given configuration.
 
-    Args:
-        project_name (str): Name of your project
-        db_path (str): Path to DuckDB file
-        log_level (str): Minimum log level
-        console_logging (bool): Enable console output
-        dataset_name (str): DLT dataset name
-        pipeline_name (str): DLT pipeline name
+    Initializes the logging system with DLT pipeline integration and optional
+    console logging. This should be called once at application startup.
 
-    All parameters are optional and will use defaults from config.py if not provided.
+    Args:
+        project_name (str, optional): Name of your project. Defaults to "tp_logger_app".
+        db_path (str, optional): Path to DuckDB file. Defaults to "./logs/app.duckdb".
+        log_level (str, optional): Minimum log level ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"). Defaults to "INFO".
+        console_logging (bool, optional): Enable console output. Defaults to True.
+        dataset_name (str, optional): DLT dataset name. Defaults to "tp_logger_logs".
+        pipeline_name (str, optional): DLT pipeline name. Defaults to "tp_logger_pipeline".
+        athena_destination (bool, optional): Enable AWS Athena integration. Defaults to False.
+        aws_region (str, optional): AWS region for Athena. Required if athena_destination=True.
+        athena_database (str, optional): Athena database name. Required if athena_destination=True.
+        athena_s3_staging_bucket (str, optional): S3 bucket for Athena staging. Required if athena_destination=True.
+
+    Returns:
+        None
+
+    Raises:
+        ValueError: If required Athena parameters are missing when athena_destination=True.
+
+    Example:
+        >>> setup_logging(
+        ...     project_name="my_app",
+        ...     db_path="./data/logs.duckdb",
+        ...     log_level="DEBUG",
+        ...     console_logging=True
+        ... )
     """
     # Create configuration using the config module with provided parameters
     config = LoggerConfig(**kwargs)
@@ -153,5 +208,19 @@ def setup_logging(**kwargs):
 
 
 def get_logger(name: str) -> TPLogger:
-    """Get a TPLogger instance."""
+    """Get a TPLogger instance for the specified module.
+
+    Creates a new TPLogger instance bound to the given module name.
+    The logger will use the global configuration set by setup_logging().
+
+    Args:
+        name (str): Module or component name for the logger.
+
+    Returns:
+        TPLogger: Configured logger instance for the specified module.
+
+    Example:
+        >>> logger = get_logger("user_service")
+        >>> logger.info("User authenticated", action="login", user_id=123)
+    """
     return TPLogger(name)

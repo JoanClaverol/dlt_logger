@@ -12,14 +12,11 @@ JOB_LOGS_COLUMNS: Any = {
     "action": {"data_type": "text"},
     "message": {"data_type": "text"},
     "request_method": {"data_type": "text"},
-    
     # Optional boolean field
     "success": {"data_type": "bool"},
-    
     # Optional integer fields
     "status_code": {"data_type": "bigint"},
     "duration_ms": {"data_type": "bigint"},
-    
     # Note: Required fields like id, project_name, run_id, timestamp, level, context
     # are automatically inferred by DLT from the Pydantic model and don't need explicit hints
 }

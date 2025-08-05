@@ -3,15 +3,17 @@
 import time
 from functools import wraps
 from contextlib import contextmanager
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 
 from .logger import TPLogger
 
 
-def log_execution(action: Optional[str] = None):
+def log_execution(
+    action: Optional[str] = None,
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """Decorator to automatically log function execution with timing."""
 
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(func)
         def wrapper(*args, **kwargs):
             module_name = func.__module__
