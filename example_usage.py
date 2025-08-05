@@ -14,10 +14,10 @@ Run this script to see tp-logger in action from start to finish.
 import sys
 from typing import Dict, Any
 
-# Import from our organized structure
-from .setup import LoggerConfig
-from .orchestrator import WorkflowManager
-from .utils import get_database_info_from_config
+# Import from tp_logger package
+from tp_logger.setup import LoggerConfig
+from tp_logger.orchestrator import WorkflowManager
+from tp_logger.utils import get_database_info_from_config
 
 
 def create_basic_config() -> LoggerConfig:

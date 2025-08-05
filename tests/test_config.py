@@ -1,7 +1,7 @@
 """Tests for tp_logger.config module."""
 
 import pytest
-from tp_logger.config import LoggerConfig, get_config, set_config
+from tp_logger.setup import LoggerConfig, get_config, set_config
 
 
 class TestLoggerConfig:
@@ -92,9 +92,9 @@ class TestGlobalConfig:
     def test_get_config_default(self):
         """Test get_config returns default config."""
         # Reset global config
-        import tp_logger.config
+        import tp_logger.setup.config
 
-        tp_logger.config._config = None
+        tp_logger.setup.config._config = None
 
         config = get_config()
         assert isinstance(config, LoggerConfig)

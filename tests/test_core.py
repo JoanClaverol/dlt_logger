@@ -4,16 +4,15 @@ import time
 import pytest
 from unittest.mock import patch, MagicMock
 
-from tp_logger.core import (
+from tp_logger import (
     setup_logging,
     get_logger,
     log_execution,
     timed_operation,
     TPLogger,
-    get_pipeline,
-    upload_to_athena,
 )
-from tp_logger.config import get_config
+from tp_logger.dlt import get_pipeline, transfer_to_athena
+from tp_logger.setup import get_config
 
 
 class TestSetupLogging:
@@ -299,19 +298,19 @@ class TestIntegration:
         assert len(pipeline.runs) >= 4  # At least 4 logging operations
 
 
-class TestUploadToAthena:
-    """Test upload_to_athena function."""
+class TestTransferToAthena:
+    """Test transfer_to_athena function."""
 
-    def test_upload_to_athena_athena_destination_false(self, setup_test_logging):
-        """Test upload_to_athena when athena_destination is False."""
+    def test_transfer_to_athena_athena_destination_false(self, setup_test_logging):
+        """Test transfer_to_athena when athena_destination is False."""
         config = get_config()
         config.athena_destination = False
 
         with pytest.raises(ValueError, match="athena_destination must be True"):
-            upload_to_athena()
+            transfer_to_athena()
 
-    def test_upload_to_athena_missing_aws_region(self, setup_test_logging):
-        """Test upload_to_athena when aws_region is missing."""
+    def test_transfer_to_athena_missing_aws_region(self, setup_test_logging):
+        """Test transfer_to_athena when aws_region is missing."""
         config = get_config()
         config.athena_destination = True
         config.aws_region = None
@@ -322,10 +321,10 @@ class TestUploadToAthena:
             ValueError,
             match="aws_region, athena_database, and athena_s3_staging_bucket are required",
         ):
-            upload_to_athena()
+            transfer_to_athena()
 
-    def test_upload_to_athena_missing_athena_database(self, setup_test_logging):
-        """Test upload_to_athena when athena_database is missing."""
+    def test_transfer_to_athena_missing_athena_database(self, setup_test_logging):
+        """Test transfer_to_athena when athena_database is missing."""
         config = get_config()
         config.athena_destination = True
         config.aws_region = "us-east-1"
@@ -336,10 +335,10 @@ class TestUploadToAthena:
             ValueError,
             match="aws_region, athena_database, and athena_s3_staging_bucket are required",
         ):
-            upload_to_athena()
+            transfer_to_athena()
 
-    def test_upload_to_athena_missing_s3_staging_bucket(self, setup_test_logging):
-        """Test upload_to_athena when athena_s3_staging_bucket is missing."""
+    def test_transfer_to_athena_missing_s3_staging_bucket(self, setup_test_logging):
+        """Test transfer_to_athena when athena_s3_staging_bucket is missing."""
         config = get_config()
         config.athena_destination = True
         config.aws_region = "us-east-1"
@@ -350,15 +349,15 @@ class TestUploadToAthena:
             ValueError,
             match="aws_region, athena_database, and athena_s3_staging_bucket are required",
         ):
-            upload_to_athena()
+            transfer_to_athena()
 
     @patch("tp_logger.athena.dlt.pipeline")
     @patch("tp_logger.athena.dlt.destinations.athena")
     @patch("tp_logger.athena.dlt.destinations.duckdb")
-    def test_upload_to_athena_success(
+    def test_transfer_to_athena_success(
         self, mock_duckdb_dest, mock_athena_dest, mock_pipeline, setup_test_logging
     ):
-        """Test successful upload_to_athena execution."""
+        """Test successful transfer_to_athena execution."""
         # Setup config
         config = get_config()
         config.athena_destination = True
@@ -381,15 +380,15 @@ class TestUploadToAthena:
         mock_athena_dest.return_value = MagicMock()
         mock_duckdb_dest.return_value = MagicMock()
 
-        result = upload_to_athena()
+        result = transfer_to_athena()
 
         assert result is True
         assert mock_pipeline.call_count == 2
         mock_athena_pipeline.run.assert_called_once()
 
     @patch("tp_logger.athena.dlt.pipeline")
-    def test_upload_to_athena_pipeline_error(self, mock_pipeline, setup_test_logging):
-        """Test upload_to_athena when pipeline creation fails."""
+    def test_transfer_to_athena_pipeline_error(self, mock_pipeline, setup_test_logging):
+        """Test transfer_to_athena when pipeline creation fails."""
         # Setup config
         config = get_config()
         config.athena_destination = True
@@ -400,17 +399,17 @@ class TestUploadToAthena:
         # Mock pipeline to raise an exception
         mock_pipeline.side_effect = Exception("Pipeline creation failed")
 
-        result = upload_to_athena()
+        result = transfer_to_athena()
 
         assert result is False
 
     @patch("tp_logger.athena.dlt.pipeline")
     @patch("tp_logger.athena.dlt.destinations.athena")
     @patch("tp_logger.athena.dlt.destinations.duckdb")
-    def test_upload_to_athena_upload_error(
+    def test_transfer_to_athena_upload_error(
         self, mock_duckdb_dest, mock_athena_dest, mock_pipeline, setup_test_logging
     ):
-        """Test upload_to_athena when table upload fails."""
+        """Test transfer_to_athena when table upload fails."""
         # Setup config
         config = get_config()
         config.athena_destination = True
@@ -436,17 +435,17 @@ class TestUploadToAthena:
         # Mock athena pipeline run to fail
         mock_athena_pipeline.run.side_effect = Exception("Upload failed")
 
-        result = upload_to_athena()
+        result = transfer_to_athena()
 
         assert result is False
 
     @patch("tp_logger.athena.dlt.pipeline")
     @patch("tp_logger.athena.dlt.destinations.athena")
     @patch("tp_logger.athena.dlt.destinations.duckdb")
-    def test_upload_to_athena_skips_dlt_tables(
+    def test_transfer_to_athena_skips_dlt_tables(
         self, mock_duckdb_dest, mock_athena_dest, mock_pipeline, setup_test_logging
     ):
-        """Test upload_to_athena skips DLT internal tables."""
+        """Test transfer_to_athena skips DLT internal tables."""
         # Setup config
         config = get_config()
         config.athena_destination = True
@@ -472,7 +471,7 @@ class TestUploadToAthena:
         mock_athena_dest.return_value = MagicMock()
         mock_duckdb_dest.return_value = MagicMock()
 
-        result = upload_to_athena()
+        result = transfer_to_athena()
 
         assert result is True
         # Should only call run once for the regular table, not the DLT table

@@ -5,7 +5,8 @@ import tempfile
 import pytest
 import duckdb
 
-from tp_logger.config import LoggerConfig, set_config, _config
+from tp_logger.setup import LoggerConfig, set_config
+from tp_logger.setup.config import _config
 
 
 @pytest.fixture
@@ -112,7 +113,7 @@ def db_connection(temp_db_path):
 def reset_global_state():
     """Reset global state before each test."""
     # Reset any global variables in the modules
-    from tp_logger import pipeline
+    from tp_logger.dlt import pipeline
 
     pipeline._pipeline = None
 
