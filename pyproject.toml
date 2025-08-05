@@ -8,6 +8,7 @@ dependencies = [
     "boto3>=1.39.8",
     "dlt[athena,duckdb]>=0.4.0",
     "duckdb>=1.3.2",
+    "ipykernel>=6.30.1",
     "loguru>=0.7.3",
     "pyarrow>=21.0.0",
     "pydantic>=2.0.0",

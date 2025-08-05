@@ -5,8 +5,8 @@ from typing import Optional, Dict, Any, List, Literal
 from loguru import logger
 
 from .models import LogEntry
-from .config import get_config, set_config, LoggerConfig
-from .pipeline import get_pipeline, job_logs, RUN_ID
+from ..setup import get_config, set_config, LoggerConfig
+from ..dlt import get_pipeline, job_logs, RUN_ID
 from .handlers import setup_console_logging
 
 
@@ -143,7 +143,7 @@ def setup_logging(**kwargs):
     set_config(config)
 
     # Reset pipeline to use new config
-    import tp_logger.pipeline as pipeline_module
+    import tp_logger.dlt.pipeline as pipeline_module
 
     pipeline_module._pipeline = None
 
