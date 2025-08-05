@@ -66,30 +66,68 @@ def transfer_to_athena() -> bool:
         bool: True if successful, False otherwise
     """
     config = get_config()
+    logger = _get_logger()
 
     try:
-        print("[ATHENA] Starting Athena transfer process")
+        # Log transfer start with structured data
+        logger.log_action(
+            action="athena_transfer_start",
+            message="Starting Athena transfer process",
+            success=True,
+            context={
+                "source_db": config.db_path,
+                "dataset": config.dataset_name,
+                "aws_region": config.aws_region,
+                "athena_database": config.athena_database,
+                "s3_staging_bucket": config.athena_s3_staging_bucket
+            }
+        )
 
         # Validate Athena configuration
         if not config.athena_destination:
-            print("[ATHENA] ERROR: athena_destination must be True")
+            logger.log_action(
+                action="athena_validation",
+                message="Athena transfer failed: athena_destination must be True",
+                success=False,
+                context={"athena_destination": config.athena_destination}
+            )
             return False
 
         if not all(
             [config.aws_region, config.athena_database, config.athena_s3_staging_bucket]
         ):
-            print("[ATHENA] ERROR: Missing required Athena configuration")
+            logger.log_action(
+                action="athena_validation",
+                message="Athena transfer failed: Missing required configuration",
+                success=False,
+                context={
+                    "aws_region": config.aws_region,
+                    "athena_database": config.athena_database,
+                    "athena_s3_staging_bucket": config.athena_s3_staging_bucket
+                }
+            )
             return False
 
         # Check if source database exists
         if not os.path.exists(config.db_path):
-            print(f"[ATHENA] ERROR: Source database does not exist: {config.db_path}")
+            logger.log_action(
+                action="athena_validation",
+                message="Athena transfer failed: Source database does not exist",
+                success=False,
+                context={"db_path": config.db_path}
+            )
             return False
 
-        print(f"[ATHENA] Using database: {config.db_path}")
-        print(f"[ATHENA] Using dataset: {config.dataset_name}")
-        print(f"[ATHENA] AWS Region: {config.aws_region}")
-        print(f"[ATHENA] Athena Database: {config.athena_database}")
+        # Log configuration validation success
+        logger.info(
+            "Athena configuration validated successfully",
+            context={
+                "database": config.db_path,
+                "dataset": config.dataset_name,
+                "aws_region": config.aws_region,
+                "athena_database": config.athena_database
+            }
+        )
 
         # Create a clean, isolated pipeline to Athena destination
         transfer_pipeline = dlt.pipeline(
@@ -98,15 +136,36 @@ def transfer_to_athena() -> bool:
             dataset_name="transferred_logs",
         )
 
-        print("[ATHENA] Transfer pipeline created successfully")
+        logger.info("Athena transfer pipeline created successfully")
 
         # Run the pipeline with the resource - pass parameters to avoid context conflicts
-        print("[ATHENA] Starting data transfer...")
+        logger.info("Starting data transfer to Athena...")
         transfer_pipeline.run(job_logs_resource(config.db_path, config.dataset_name))
 
-        print("[ATHENA] Transfer completed successfully")
+        # Log successful completion
+        logger.log_action(
+            action="athena_transfer_complete",
+            message="Athena transfer completed successfully",
+            success=True,
+            context={
+                "source_db": config.db_path,
+                "dataset": config.dataset_name,
+                "destination_pipeline": "athena_log_transfer"
+            }
+        )
         return True
 
     except Exception as e:
-        print(f"[ATHENA] ERROR: Transfer failed: {type(e).__name__}: {str(e)}")
+        # Log failure with exception details
+        logger.log_action(
+            action="athena_transfer_error",
+            message=f"Athena transfer failed: {str(e)}",
+            success=False,
+            context={
+                "exception_type": type(e).__name__,
+                "exception_message": str(e),
+                "source_db": config.db_path,
+                "dataset": config.dataset_name
+            }
+        )
         return False
