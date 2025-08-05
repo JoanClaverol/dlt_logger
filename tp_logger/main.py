@@ -171,7 +171,7 @@ def demonstrate_athena_workflow():
     print_section_header("Step 2: Execute Complete Workflow with Athena")
     print("🔄 Running end-to-end workflow with Athena transfer...")
     
-    results = workflow.run_complete_workflow(sample_log_count=20)
+    results = workflow.run_complete_workflow(sample_log_count=200)
     
     # Show results
     print_workflow_results(results)

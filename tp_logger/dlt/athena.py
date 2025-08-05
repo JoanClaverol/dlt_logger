@@ -15,30 +15,39 @@ def _get_logger():
     return get_logger("athena")
 
 
-@dlt.resource(name="job_logs", write_disposition="append", columns=JOB_LOGS_COLUMNS)
-def job_logs_resource(db_path: str, dataset_name: str) -> Iterator[Dict[str, Any]]:
+@dlt.resource(name="job_logs", write_disposition="append", columns=JOB_LOGS_COLUMNS, parallelized=True)
+def job_logs_resource(db_path: str, dataset_name: str, batch_size: int = 10000) -> Iterator[Dict[str, Any]]:
     """
-    A DLT resource that reads all job logs from the source DuckDB database.
-    This function is completely self-contained to avoid DLT context conflicts.
+    A DLT resource that reads job logs from the source DuckDB database in batches.
+    Uses batch processing and parallelization for improved performance.
+    
+    Args:
+        db_path: Path to the source DuckDB database
+        dataset_name: Name of the dataset containing job_logs table
+        batch_size: Number of rows to process in each batch (default: 10000)
     """
     # A resource should be self-contained and create its own connection
     with duckdb.connect(db_path, read_only=True) as conn:
         
-        # Query all columns from the job_logs table
+        # Query all columns from the job_logs table without expensive ORDER BY
         query = f"""
         SELECT 
             *
         FROM {dataset_name}.job_logs
-        ORDER BY timestamp DESC
         """
         
         cursor = conn.execute(query)
         columns = [desc[0] for desc in cursor.description] if cursor.description else []
         
-        # Yield each row as a dictionary
-        # This streams results without loading the whole table into memory
-        for row in cursor.fetchall():
-            yield dict(zip(columns, row))
+        # Process rows in batches for better performance
+        while True:
+            batch_rows = cursor.fetchmany(batch_size)
+            if not batch_rows:
+                break
+                
+            # Yield batch as a list of dictionaries
+            batch_data = [dict(zip(columns, row)) for row in batch_rows]
+            yield batch_data
 
 
 def transfer_to_athena() -> bool:
