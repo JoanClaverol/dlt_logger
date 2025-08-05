@@ -19,8 +19,38 @@ A modern, structured logging library for Python with DuckDB storage and optional
 
 ### Installation
 
+#### From GitHub (Latest Development Version)
+
 ```bash
+# Install directly from GitHub
+pip install git+https://github.com/JoanClaverol/dlt_logger.git
+
+# Or install with uv (recommended)
+uv add git+https://github.com/JoanClaverol/dlt_logger.git
+```
+
+#### From PyPI (When Available)
+
+```bash
+# Standard installation
 pip install dlt-logger
+
+# Or with uv
+uv add dlt-logger
+```
+
+#### Development Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/JoanClaverol/dlt_logger.git
+cd dlt_logger
+
+# Install with uv (recommended)
+uv sync
+
+# Or with pip
+pip install -e .
 ```
 
 ### Basic Usage
