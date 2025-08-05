@@ -20,12 +20,10 @@ def _get_logger():
 
 @dlt.resource(
     name="job_logs",
-    write_disposition="merge",
+    write_disposition="append",
     columns=JOB_LOGS_COLUMNS,
     parallelized=True,
-    merge_key="_dlt_id",
     table_format="iceberg"
-
 )
 def job_logs_resource(
     db_path: str, dataset_name: str, batch_size: int = 10000
