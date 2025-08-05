@@ -1,18 +1,18 @@
-"""Tests for tp_logger.core module."""
+"""Tests for dlt_logger.core module."""
 
 import time
 import pytest
 from unittest.mock import patch, MagicMock
 
-from tp_logger import (
+from dlt_logger import (
     setup_logging,
     get_logger,
     log_execution,
     timed_operation,
     TPLogger,
 )
-from tp_logger.dlt import get_pipeline, transfer_to_athena
-from tp_logger.setup import get_config
+from dlt_logger.dlt import get_pipeline, transfer_to_athena
+from dlt_logger.setup import get_config
 
 
 class TestSetupLogging:

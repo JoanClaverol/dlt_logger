@@ -1,20 +1,20 @@
-"""Configuration management for tp-logger."""
+"""Configuration management for dlt-logger."""
 
 import os
 from typing import Optional
 
 
 class LoggerConfig:
-    """Configuration class for tp-logger."""
+    """Configuration class for dlt-logger."""
 
     def __init__(
         self,
-        project_name: str = "tp_logger_app",
+        project_name: str = "dlt_logger_app",
         db_path: Optional[str] = None,
         log_level: str = "INFO",
         console_logging: bool = True,
-        pipeline_name: str = "tp_logger_pipeline",
-        dataset_name: str = "tp_logger_logs",
+        pipeline_name: str = "dlt_logger_pipeline",
+        dataset_name: str = "dlt_logger_logs",
         sync_to_s3: bool = False,
         aws_s3_bucket: Optional[str] = None,
         aws_s3_key_prefix: str = "logs/",

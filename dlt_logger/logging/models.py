@@ -1,9 +1,9 @@
 """Pydantic models for tp-logger data structures."""
 
-from datetime import datetime
-from typing import Optional, Dict, Any, Literal
-from uuid import UUID, uuid4
 import json
+from datetime import datetime
+from typing import Any, Dict, Literal, Optional
+from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, field_validator
 

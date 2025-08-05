@@ -1,9 +1,9 @@
-"""Centralized DLT column schema definitions for tp-logger."""
+"""Centralized DLT column schema definitions for dlt-logger."""
 
 from typing import Any
 
 # DLT column definitions for job_logs table
-# Based on LogEntry model from tp_logger/logging/models.py
+# Based on LogEntry model from dlt_logger/logging/models.py
 # These type hints ensure DLT can properly infer column types even when values are None
 JOB_LOGS_COLUMNS: Any = {
     # Optional string fields that may be None

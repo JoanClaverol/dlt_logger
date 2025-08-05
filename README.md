@@ -1,4 +1,4 @@
-# tp-logger
+# dlt-logger
 
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -20,22 +20,22 @@ A modern, structured logging library for Python with DuckDB storage and optional
 ### Installation
 
 ```bash
-pip install tp-logger
+pip install dlt-logger
 ```
 
 ### Basic Usage
 
 ```python
-import tp_logger
+import dlt_logger
 
 # 1. Setup (call once at application startup)
-tp_logger.setup_logging(
+dlt_logger.setup_logging(
     project_name="my_app",
     db_path="./logs/app.duckdb"
 )
 
 # 2. Get a logger
-logger = tp_logger.get_logger(__name__)
+logger = dlt_logger.get_logger(__name__)
 
 # 3. Start logging
 logger.info("Application started")
@@ -54,11 +54,11 @@ logger.log_action(
 ### Automatic Function Logging
 
 ```python
-import tp_logger
+import dlt_logger
 
-tp_logger.setup_logging(project_name="my_app")
+dlt_logger.setup_logging(project_name="my_app")
 
-@tp_logger.log_execution("data_processing")
+@dlt_logger.log_execution("data_processing")
 def process_data(user_id: int):
     # Function automatically logged with timing
     return {"processed": True, "user_id": user_id}
@@ -78,7 +78,7 @@ def process_data(user_id: int):
 Initialize the logging system. Call once at application startup.
 
 ```python
-tp_logger.setup_logging(
+dlt_logger.setup_logging(
     project_name="my_app",                    # Required: Your project name
     db_path="./logs/app.duckdb",             # Optional: Database path
     log_level="INFO",                        # Optional: Log level
@@ -93,8 +93,8 @@ tp_logger.setup_logging(
 Get a logger instance for a specific module or component.
 
 ```python
-logger = tp_logger.get_logger(__name__)
-logger = tp_logger.get_logger("api_service")
+logger = dlt_logger.get_logger(__name__)
+logger = dlt_logger.get_logger("api_service")
 ```
 
 #### `@log_execution(action: str = None)`
@@ -102,11 +102,11 @@ logger = tp_logger.get_logger("api_service")
 Decorator for automatic function logging with timing.
 
 ```python
-@tp_logger.log_execution("api_call")
+@dlt_logger.log_execution("api_call")
 def fetch_user(user_id: int):
     return {"user": user_id}
 
-@tp_logger.log_execution()  # Uses function name
+@dlt_logger.log_execution()  # Uses function name
 def process_payment():
     return {"status": "paid"}
 ```
@@ -116,7 +116,7 @@ def process_payment():
 #### Basic Logging
 
 ```python
-logger = tp_logger.get_logger("my_service")
+logger = dlt_logger.get_logger("my_service")
 
 logger.debug("Debug information")
 logger.info("General information")
@@ -153,7 +153,7 @@ except Exception as e:
 ### Context Manager for Timing
 
 ```python
-from tp_logger import get_logger, timed_operation
+from dlt_logger import get_logger, timed_operation
 
 logger = get_logger(__name__)
 
@@ -169,7 +169,7 @@ Upload your logs to AWS Athena for cloud-scale analytics.
 ### Setup
 
 ```python
-tp_logger.setup_logging(
+dlt_logger.setup_logging(
     project_name="production_app",
     # Enable Athena
     athena_destination=True,
@@ -182,7 +182,7 @@ tp_logger.setup_logging(
 ### Transfer Data
 
 ```python
-from tp_logger.dlt import transfer_to_athena
+from dlt_logger.dlt import transfer_to_athena
 
 # Transfer logs to Athena
 success = transfer_to_athena()
@@ -213,7 +213,7 @@ export AWS_SECRET_ACCESS_KEY="your_secret_key"
 For complex operations, use the WorkflowManager:
 
 ```python
-from tp_logger import WorkflowManager, LoggerConfig
+from dlt_logger import WorkflowManager, LoggerConfig
 
 config = LoggerConfig(
     project_name="data_pipeline",
@@ -231,7 +231,7 @@ print(f"Duration: {results['total_duration_ms']}ms")
 ### Custom Configuration
 
 ```python
-from tp_logger.setup import LoggerConfig
+from dlt_logger.setup import LoggerConfig
 
 config = LoggerConfig(
     project_name="custom_app",
@@ -242,7 +242,7 @@ config = LoggerConfig(
     aws_region="eu-west-1"
 )
 
-tp_logger.setup_logging(**config.__dict__)
+dlt_logger.setup_logging(**config.__dict__)
 ```
 
 ### Environment Variables
@@ -292,7 +292,7 @@ perf_query = """
            COUNT(*) as calls,
            AVG(duration_ms) as avg_duration,
            MAX(duration_ms) as max_duration
-    FROM tp_logger_logs.job_logs 
+    FROM dlt_logger_logs.job_logs 
     WHERE success = true AND duration_ms IS NOT NULL
     GROUP BY action
     ORDER BY avg_duration DESC
@@ -319,23 +319,23 @@ ORDER BY hour DESC;
 ## 🎯 Real-World Example
 
 ```python
-import tp_logger
+import dlt_logger
 import time
 
 # Setup
-tp_logger.setup_logging(
+dlt_logger.setup_logging(
     project_name="ecommerce_api",
     athena_destination=True,
     aws_region="us-east-1"
 )
 
-logger = tp_logger.get_logger(__name__)
+logger = dlt_logger.get_logger(__name__)
 
 class OrderProcessor:
     def __init__(self):
-        self.logger = tp_logger.get_logger(self.__class__.__name__)
+        self.logger = dlt_logger.get_logger(self.__class__.__name__)
     
-    @tp_logger.log_execution("order_processing")
+    @dlt_logger.log_execution("order_processing")
     def process_order(self, order_id: str, items: list):
         """Process order with automatic logging."""
         
@@ -356,7 +356,7 @@ class OrderProcessor:
             return False
         
         # Process payment with timing
-        with tp_logger.timed_operation(self.logger, "payment_processing"):
+        with dlt_logger.timed_operation(self.logger, "payment_processing"):
             if not self._process_payment(order_id):
                 return False
         
@@ -406,17 +406,17 @@ logger.info(f"Order result: {'SUCCESS' if success else 'FAILED'}")
 **Import Error**
 ```python
 # ❌ Wrong
-from tp_logger.core import setup_logging
+from dlt_logger.core import setup_logging
 
 # ✅ Correct
-import tp_logger
-tp_logger.setup_logging(...)
+import dlt_logger
+dlt_logger.setup_logging(...)
 ```
 
 **DLT Pipeline Issues**
 ```python
 # Check pipeline status
-from tp_logger.dlt import get_pipeline
+from dlt_logger.dlt import get_pipeline
 pipeline = get_pipeline()
 print(f"Pipeline working dir: {pipeline.working_dir}")
 ```
@@ -424,7 +424,7 @@ print(f"Pipeline working dir: {pipeline.working_dir}")
 **Athena Upload Failures**
 ```python
 # Validate configuration
-from tp_logger.setup import get_config
+from dlt_logger.setup import get_config
 config = get_config()
 
 if not all([config.athena_destination, config.aws_region, 
@@ -435,7 +435,7 @@ if not all([config.athena_destination, config.aws_region,
 ### Debug Mode
 
 ```python
-tp_logger.setup_logging(
+dlt_logger.setup_logging(
     project_name="debug_app",
     log_level="DEBUG",
     console_logging=True

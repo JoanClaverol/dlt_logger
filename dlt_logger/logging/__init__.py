@@ -1,4 +1,4 @@
-"""Core logging functionality for tp-logger.
+"""Core logging functionality for dlt-logger.
 
 This module provides the main logging infrastructure including:
 - TPLogger: Main logger class with DLT integration
@@ -7,7 +7,7 @@ This module provides the main logging infrastructure including:
 
 Usage Examples:
     Direct logging:
-        >>> from tp_logger.logging import TPLogger, setup_logging
+        >>> from dlt_logger.logging import TPLogger, setup_logging
         >>>
         >>> setup_logging(project_name="my_app")
         >>> logger = TPLogger("my_module")
@@ -15,7 +15,7 @@ Usage Examples:
         >>> logger.log_action("user_login", "User authenticated", success=True, duration_ms=150)
 
     Decorator usage:
-        >>> from tp_logger.logging import log_execution
+        >>> from dlt_logger.logging import log_execution
         >>>
         >>> @log_execution("api_call")
         ... def fetch_data(user_id):
@@ -23,7 +23,7 @@ Usage Examples:
         ...     return f"data_for_{user_id}"
 
     Context manager usage:
-        >>> from tp_logger.logging import get_logger, timed_operation
+        >>> from dlt_logger.logging import get_logger, timed_operation
         >>>
         >>> logger = get_logger("database")
         >>> with timed_operation(logger, "database_query", user_id=123):
@@ -31,10 +31,10 @@ Usage Examples:
         ...     pass
 """
 
-from .models import LogEntry
-from .logger import TPLogger, setup_logging, get_logger
-from .handlers import setup_console_logging
 from .decorators import log_execution, timed_operation
+from .handlers import setup_console_logging
+from .logger import TPLogger, get_logger, setup_logging
+from .models import LogEntry
 
 __all__ = [
     "LogEntry",

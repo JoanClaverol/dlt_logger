@@ -1,8 +1,8 @@
-# Product Requirements Document: tp-logger
+# Product Requirements Document: dlt-logger
 
 ## Executive Summary
 
-tp-logger is a Python library designed to provide structured logging with automatic data storage and analytics capabilities for enterprise applications. It combines the simplicity of traditional logging with the power of modern data pipeline technologies (DLT Hub) and analytical databases (DuckDB).
+dlt-logger is a Python library designed to provide structured logging with automatic data storage and analytics capabilities for enterprise applications. It combines the simplicity of traditional logging with the power of modern data pipeline technologies (DLT Hub) and analytical databases (DuckDB).
 
 ## Problem Statement
 
@@ -21,7 +21,7 @@ tp-logger is a Python library designed to provide structured logging with automa
 
 ## Solution Overview
 
-tp-logger provides a unified logging solution that:
+dlt-logger provides a unified logging solution that:
 1. **Stores structured logs** in DuckDB for immediate querying
 2. **Uses DLT Hub** for robust data pipeline management
 3. **Provides decorators** for effortless function logging
@@ -102,7 +102,7 @@ tp-logger provides a unified logging solution that:
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Application   │───▶│    tp-logger     │───▶│     DuckDB      │
+│   Application   │───▶│    dlt-logger     │───▶│     DuckDB      │
 │                 │    │                  │    │                 │
 │ @log_execution  │    │ - TPLogger       │    │ job_logs table  │
 │ logger.info()   │    │ - Pydantic       │    │ - Structured    │
@@ -214,7 +214,7 @@ CREATE TABLE job_logs (
 
 ### Existing Solutions
 
-| Solution | Pros | Cons | tp-logger Advantage |
+| Solution | Pros | Cons | dlt-logger Advantage |
 |----------|------|------|-------------------|
 | Python logging | Built-in, familiar | No structure, manual analysis | Structured data + analytics |
 | Loguru | Beautiful output | Console only | Database storage |
@@ -278,7 +278,7 @@ CREATE TABLE job_logs (
 
 ## Conclusion
 
-tp-logger addresses a clear market need for simple, structured logging with built-in analytics capabilities. By combining the simplicity of traditional logging with modern data pipeline technologies, it provides immediate value to developers while enabling powerful analytics capabilities.
+dlt-logger addresses a clear market need for simple, structured logging with built-in analytics capabilities. By combining the simplicity of traditional logging with modern data pipeline technologies, it provides immediate value to developers while enabling powerful analytics capabilities.
 
 The solution is designed for rapid adoption with minimal setup overhead, making it ideal for teams who want structured logging benefits without infrastructure complexity. The local-first approach reduces costs and complexity while providing full control over data.
 

@@ -1,17 +1,17 @@
-"""Core TPLogger class for tp-logger."""
+"""Core TPLogger class for dlt-logger."""
 
-from typing import Optional, Dict, Any, Literal
+from typing import Any, Dict, Literal, Optional
 
 from loguru import logger
 
-from .models import LogEntry
-from ..setup import get_config, set_config, LoggerConfig
-from ..dlt import get_pipeline, job_logs, RUN_ID
+from ..dlt import RUN_ID, get_pipeline, job_logs
+from ..setup import LoggerConfig, get_config, set_config
 from .handlers import setup_console_logging
+from .models import LogEntry
 
 
 class TPLogger:
-    """Main logger class for tp-logger using DLT Hub integration.
+    """Main logger class for dlt-logger using DLT Hub integration.
 
     Provides structured logging with automatic storage to DuckDB via DLT pipelines.
     Supports both simple logging methods (info, warning, error) and advanced
@@ -162,18 +162,18 @@ class TPLogger:
 
 
 def setup_logging(**kwargs):
-    """Setup tp-logger with the given configuration.
+    """Setup dlt-logger with the given configuration.
 
     Initializes the logging system with DLT pipeline integration and optional
     console logging. This should be called once at application startup.
 
     Args:
-        project_name (str, optional): Name of your project. Defaults to "tp_logger_app".
+        project_name (str, optional): Name of your project. Defaults to "dlt_logger_app".
         db_path (str, optional): Path to DuckDB file. Defaults to "./logs/app.duckdb".
         log_level (str, optional): Minimum log level ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"). Defaults to "INFO".
         console_logging (bool, optional): Enable console output. Defaults to True.
-        dataset_name (str, optional): DLT dataset name. Defaults to "tp_logger_logs".
-        pipeline_name (str, optional): DLT pipeline name. Defaults to "tp_logger_pipeline".
+        dataset_name (str, optional): DLT dataset name. Defaults to "dlt_logger_logs".
+        pipeline_name (str, optional): DLT pipeline name. Defaults to "dlt_logger_pipeline".
         athena_destination (bool, optional): Enable AWS Athena integration. Defaults to False.
         aws_region (str, optional): AWS region for Athena. Required if athena_destination=True.
         athena_database (str, optional): Athena database name. Required if athena_destination=True.
@@ -198,7 +198,7 @@ def setup_logging(**kwargs):
     set_config(config)
 
     # Reset pipeline to use new config
-    import tp_logger.dlt.pipeline as pipeline_module
+    import dlt_logger.dlt.pipeline as pipeline_module
 
     pipeline_module._pipeline = None
 

@@ -1,4 +1,4 @@
-"""DLT operations for storage and transfer in tp-logger.
+"""DLT operations for storage and transfer in dlt-logger.
 
 This module handles DLT Hub integration for:
 - DuckDB pipeline management and log storage
@@ -8,16 +8,16 @@ This module handles DLT Hub integration for:
 
 Usage Examples:
     Pipeline operations:
-        >>> from tp_logger.dlt import get_pipeline, job_logs, RUN_ID
-        >>> from tp_logger.logging.models import LogEntry
+        >>> from dlt_logger.dlt import get_pipeline, job_logs, RUN_ID
+        >>> from dlt_logger.logging.models import LogEntry
         >>>
         >>> pipeline = get_pipeline()
         >>> log_entry = LogEntry(project_name="test", run_id=RUN_ID, level="INFO", message="Test")
         >>> pipeline.run(job_logs([log_entry]))
 
     Athena transfer:
-        >>> from tp_logger.dlt import transfer_to_athena
-        >>> from tp_logger.setup import LoggerConfig, set_config
+        >>> from dlt_logger.dlt import transfer_to_athena
+        >>> from dlt_logger.setup import LoggerConfig, set_config
         >>>
         >>> config = LoggerConfig(
         ...     athena_destination=True,
@@ -34,8 +34,8 @@ Note:
     For Athena operations, valid AWS credentials and S3 bucket access are required.
 """
 
-from .pipeline import get_pipeline, job_logs, RUN_ID
 from .athena import job_logs_resource, transfer_to_athena
+from .pipeline import RUN_ID, get_pipeline, job_logs
 
 __all__ = [
     "get_pipeline",

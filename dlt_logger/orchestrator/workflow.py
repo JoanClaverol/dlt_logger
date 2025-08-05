@@ -1,18 +1,18 @@
 """Workflow orchestration for tp-logger end-to-end operations."""
 
-from typing import Dict, Any, Optional
-from datetime import datetime
 import time
+from datetime import datetime
+from typing import Any, Dict, Optional
 
+from ..dlt import transfer_to_athena
+from ..logging import get_logger, setup_logging
 from ..setup import LoggerConfig, get_config, set_config
-from ..logging import setup_logging, get_logger
 from ..utils import (
+    ensure_directory_exists,
+    format_duration,
     generate_sample_log_data,
     get_database_info_from_config,
-    format_duration,
-    ensure_directory_exists,
 )
-from ..dlt import transfer_to_athena
 
 
 class WorkflowManager:

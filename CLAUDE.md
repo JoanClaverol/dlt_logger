@@ -1,7 +1,7 @@
-# tp-logger Development Instructions
+# dlt-logger Development Instructions
 
 ## Project Overview
-tp-logger is a Python library for structured logging with DuckDB storage via DLT Hub. It provides simple decorator-based logging with built-in analytics capabilities.
+dlt-logger is a Python library for structured logging with DuckDB storage via DLT Hub. It provides simple decorator-based logging with built-in analytics capabilities.
 
 ## Development Environment
 
@@ -36,7 +36,7 @@ uv sync --upgrade
 
 ## Project Structure
 ```
-tp_logger/                  # Main package
+dlt_logger/                  # Main package
 ├── __init__.py            # Package exports
 ├── config.py              # Configuration management
 ├── core.py                # DLT-based logging implementation
@@ -120,15 +120,15 @@ uv run pytest tests/       # Run all tests
 
 ### Debugging
 - Use `console_logging=True` for development
-- Check database contents: `duckdb logs/app.duckdb "SELECT * FROM tp_logger_logs.job_logs"`
+- Check database contents: `duckdb logs/app.duckdb "SELECT * FROM dlt_logger_logs.job_logs"`
 - Enable debug logging: `log_level="DEBUG"`
 
 ## Release Process
 
 1. **Update version** in pyproject.toml
-2. **Run full test suite**: `uv run pytest tests/ --cov=tp_logger`
+2. **Run full test suite**: `uv run pytest tests/ --cov=dlt_logger`
 3. **Build package**: `uv build`
-4. **Test installation**: `pip install dist/tp_logger-*.whl`
+4. **Test installation**: `pip install dist/dlt_logger-*.whl`
 5. **Commit changes** with version tag
 
 ## Important Notes
@@ -154,7 +154,7 @@ uv run pytest tests/       # Run all tests
 - **Import errors**: Check `uv sync` completed successfully
 - **Test failures**: Ensure clean environment with `uv run pytest --cache-clear`
 - **DLT errors**: Check DuckDB file permissions and disk space
-- **Type errors**: Run `uv run python -m mypy tp_logger/` if available
+- **Type errors**: Run `uv run python -m mypy dlt_logger/` if available
 
 ### Getting Help
 - **Documentation**: README.md for user guide

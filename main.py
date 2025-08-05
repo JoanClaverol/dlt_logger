@@ -1,11 +1,11 @@
-# """Example usage of tp-logger library."""
+# """Example usage of dlt-logger library."""
 
 # import time
-# from tp_logger import setup_logging, get_logger, log_execution
+# from dlt_logger import setup_logging, get_logger, log_execution
 
 
 # def main():
-#     """Main function demonstrating tp-logger usage."""
+#     """Main function demonstrating dlt-logger usage."""
 #     # Setup logging - this is what users will do in their main.py
 #     setup_logging(
 #         project_name="example_app",

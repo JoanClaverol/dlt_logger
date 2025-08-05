@@ -1,29 +1,29 @@
 """
-Main demonstration script for tp-logger: Complete workflow from setup to Athena transfer.
+Main demonstration script for dlt-logger: Complete workflow from setup to Athena transfer.
 
-This script tells the complete story of tp-logger:
+This script tells the complete story of dlt-logger:
 1. Setup: Configuration and initialization
 2. Logging: Generate sample logs and store in DuckDB
 3. Storage: Verify DuckDB storage
 4. Transfer: Move data to AWS Athena (if configured)
 5. Orchestration: Coordinate the entire workflow
 
-Run this script to see tp-logger in action from start to finish.
+Run this script to see dlt-logger in action from start to finish.
 """
 
 import sys
 from typing import Dict, Any
 
-# Import from tp_logger package
-from tp_logger.setup import LoggerConfig
-from tp_logger.orchestrator import WorkflowManager
-from tp_logger.utils import get_database_info_from_config
+# Import from dlt_logger package
+from dlt_logger.setup import LoggerConfig
+from dlt_logger.orchestrator import WorkflowManager
+from dlt_logger.utils import get_database_info_from_config
 
 
 def create_basic_config() -> LoggerConfig:
     """Create a basic configuration for demonstration."""
     return LoggerConfig(
-        project_name="tp_logger_demo",
+        project_name="dlt_logger_demo",
         db_path="./logs/demo.duckdb",
         log_level="INFO",
         console_logging=True,
@@ -34,7 +34,7 @@ def create_basic_config() -> LoggerConfig:
         # Uncomment and configure if you want to test Athena transfer:
         # athena_destination=True,
         # aws_region="us-east-1",
-        # athena_database="tp_logger_db",
+        # athena_database="dlt_logger_db",
         # athena_s3_staging_bucket="your-s3-bucket"
     )
 
@@ -42,7 +42,7 @@ def create_basic_config() -> LoggerConfig:
 def create_athena_config() -> LoggerConfig:
     """Create a configuration with Athena enabled (requires AWS setup)."""
     return LoggerConfig(
-        project_name="tp_logger_athena_demo",
+        project_name="dlt_logger_athena_demo",
         db_path="./logs/athena_demo.duckdb",
         log_level="INFO",
         console_logging=True,
@@ -51,8 +51,8 @@ def create_athena_config() -> LoggerConfig:
         # Athena configuration
         athena_destination=True,
         aws_region="eu-west-3",
-        athena_database="tp_logger_test_db",
-        athena_s3_staging_bucket="tp-logger-test-bucket",
+        athena_database="dlt_logger_test_db",
+        athena_s3_staging_bucket="dlt-logger-test-bucket",
     )
 
 
@@ -82,10 +82,10 @@ def print_workflow_results(results: Dict[str, Any]) -> None:
 
 
 def demonstrate_basic_workflow():
-    """Demonstrate the basic tp-logger workflow without Athena."""
+    """Demonstrate the basic dlt-logger workflow without Athena."""
     print_section_header("TP-Logger Basic Workflow Demonstration")
 
-    print("🚀 This demonstration will show you tp-logger's complete workflow:")
+    print("🚀 This demonstration will show you dlt-logger's complete workflow:")
     print("   1. Configuration Setup")
     print("   2. Sample Log Generation")
     print("   3. DuckDB Storage")
@@ -182,7 +182,7 @@ def demonstrate_athena_workflow():
 
 
 def main():
-    """Main entry point for tp-logger demonstration."""
+    """Main entry point for dlt-logger demonstration."""
     print_section_header("Welcome to TP-Logger Complete Demonstration")
 
     print("Choose a demonstration mode:")
@@ -202,22 +202,22 @@ def main():
                 results = demonstrate_athena_workflow()
                 break
             elif choice == "3":
-                print("👋 Thanks for trying tp-logger!")
+                print("👋 Thanks for trying dlt-logger!")
                 sys.exit(0)
             else:
                 print("❌ Invalid choice. Please enter 1, 2, or 3.")
         except KeyboardInterrupt:
-            print("\n\n👋 Thanks for trying tp-logger!")
+            print("\n\n👋 Thanks for trying dlt-logger!")
             sys.exit(0)
         except Exception as e:
             print(f"❌ Error: {e}")
             break
 
     print_section_header("Demonstration Complete")
-    print("🎉 tp-logger demonstration finished!")
+    print("🎉 dlt-logger demonstration finished!")
     print("\nNext steps:")
     print("1. Check your logs directory for the generated DuckDB file")
-    print("2. Explore the tp-logger API for your own applications")
+    print("2. Explore the dlt-logger API for your own applications")
     print("3. Configure Athena settings for production use")
     print("4. Review the workflow results above for any issues")
 

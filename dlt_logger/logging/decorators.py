@@ -1,9 +1,9 @@
-"""Decorators and context managers for tp-logger."""
+"""Decorators and context managers for dlt-logger."""
 
 import time
-from functools import wraps
 from contextlib import contextmanager
-from typing import Optional, Callable, Any
+from functools import wraps
+from typing import Any, Callable, Optional
 
 from .logger import TPLogger
 
@@ -20,11 +20,11 @@ def log_execution(
             function_name = func.__name__
             action_name = action or f"{function_name}_execution"
 
-            tp_logger = TPLogger(module_name)
+            dlt_logger = TPLogger(module_name)
 
             start_time = time.time()
             try:
-                tp_logger.info(
+                dlt_logger.info(
                     f"Starting {action_name}",
                     action=action_name,
                     function_name=function_name,
@@ -34,7 +34,7 @@ def log_execution(
                 result = func(*args, **kwargs)
 
                 duration_ms = int((time.time() - start_time) * 1000)
-                tp_logger.info(
+                dlt_logger.info(
                     f"Completed {action_name} in {duration_ms}ms",
                     action=action_name,
                     function_name=function_name,
@@ -46,8 +46,8 @@ def log_execution(
 
             except Exception as e:
                 duration_ms = int((time.time() - start_time) * 1000)
-                tp_logger.log_exception(action_name, e)
-                tp_logger._log(
+                dlt_logger.log_exception(action_name, e)
+                dlt_logger._log(
                     level="ERROR",
                     message=f"Failed {action_name} after {duration_ms}ms",
                     action=action_name,
@@ -63,14 +63,14 @@ def log_execution(
 
 
 @contextmanager
-def timed_operation(tp_logger: TPLogger, action: str, **log_kwargs):
+def timed_operation(dlt_logger: TPLogger, action: str, **log_kwargs):
     """Context manager for timing operations."""
     start_time = time.time()
     try:
-        tp_logger.info(f"Starting {action}", action=action, **log_kwargs)
+        dlt_logger.info(f"Starting {action}", action=action, **log_kwargs)
         yield
         duration_ms = int((time.time() - start_time) * 1000)
-        tp_logger.info(
+        dlt_logger.info(
             f"Completed {action} in {duration_ms}ms",
             action=action,
             success=True,
@@ -79,8 +79,8 @@ def timed_operation(tp_logger: TPLogger, action: str, **log_kwargs):
         )
     except Exception as e:
         duration_ms = int((time.time() - start_time) * 1000)
-        tp_logger.log_exception(action, e)
-        tp_logger._log(
+        dlt_logger.log_exception(action, e)
+        dlt_logger._log(
             level="ERROR",
             message=f"Failed {action} after {duration_ms}ms",
             action=action,

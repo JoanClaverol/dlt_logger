@@ -1,7 +1,7 @@
 """Logging handlers for tp-logger."""
 
-import sys
 import logging
+import sys
 
 from loguru import logger
 

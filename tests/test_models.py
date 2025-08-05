@@ -1,11 +1,11 @@
-"""Tests for tp_logger.models module."""
+"""Tests for dlt_logger.models module."""
 
 import json
 from datetime import datetime
 from uuid import UUID, uuid4
 import pytest
 
-from tp_logger.models import LogEntry
+from dlt_logger.logging.models import LogEntry
 
 
 class TestLogEntry:

@@ -1,14 +1,14 @@
-"""Workflow orchestration for tp-logger.
+"""Workflow orchestration for dlt-logger.
 
-This module provides WorkflowManager for end-to-end tp-logger operations:
+This module provides WorkflowManager for end-to-end dlt-logger operations:
 - Configuration setup and validation
 - Sample log generation for testing
 - DuckDB storage verification
 - AWS Athena transfer (when configured)
 
 Usage Example:
-    >>> from tp_logger.orchestrator import WorkflowManager
-    >>> from tp_logger.setup import LoggerConfig
+    >>> from dlt_logger.orchestrator import WorkflowManager
+    >>> from dlt_logger.setup import LoggerConfig
     >>>
     >>> # Create configuration
     >>> config = LoggerConfig(

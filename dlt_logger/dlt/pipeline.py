@@ -1,6 +1,6 @@
 """Pipeline management for tp-logger using DLT Hub."""
 
-from typing import Optional, List
+from typing import List, Optional
 from uuid import uuid4
 
 import dlt
@@ -8,7 +8,6 @@ import dlt
 from ..logging.models import LogEntry
 from ..setup import get_config
 from .columns_schema import JOB_LOGS_COLUMNS
-
 
 # Global pipeline instance
 _pipeline: Optional[dlt.Pipeline] = None

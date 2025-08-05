@@ -1,9 +1,11 @@
 """Athena transfer functionality for tp-logger using DLT resources."""
 
+import os
+from collections.abc import Iterator
+from typing import Any, Dict, List
+
 import dlt
 import duckdb
-import os
-from typing import Iterator, Dict, Any, List
 
 from ..setup import get_config
 from .columns_schema import JOB_LOGS_COLUMNS

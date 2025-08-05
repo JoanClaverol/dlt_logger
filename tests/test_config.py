@@ -1,7 +1,7 @@
-"""Tests for tp_logger.config module."""
+"""Tests for dlt_logger.config module."""
 
 import pytest
-from tp_logger.setup import LoggerConfig, get_config, set_config
+from dlt_logger.setup import LoggerConfig, get_config, set_config
 
 
 class TestLoggerConfig:
@@ -11,12 +11,12 @@ class TestLoggerConfig:
         """Test default configuration values."""
         config = LoggerConfig()
 
-        assert config.project_name == "tp_logger_app"
+        assert config.project_name == "dlt_logger_app"
         assert config.db_path == "./logs/app.duckdb"
         assert config.log_level == "INFO"
         assert config.console_logging is True
-        assert config.dataset_name == "tp_logger_logs"
-        assert config.pipeline_name == "tp_logger_pipeline"
+        assert config.dataset_name == "dlt_logger_logs"
+        assert config.pipeline_name == "dlt_logger_pipeline"
         assert config.sync_to_s3 is False
 
     def test_custom_config(self):
@@ -92,13 +92,13 @@ class TestGlobalConfig:
     def test_get_config_default(self):
         """Test get_config returns default config."""
         # Reset global config
-        import tp_logger.setup.config
+        import dlt_logger.setup.config
 
-        tp_logger.setup.config._config = None
+        dlt_logger.setup.config._config = None
 
         config = get_config()
         assert isinstance(config, LoggerConfig)
-        assert config.project_name == "tp_logger_app"
+        assert config.project_name == "dlt_logger_app"
 
     def test_set_and_get_config(self):
         """Test setting and getting custom config."""
