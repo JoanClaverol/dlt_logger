@@ -135,7 +135,7 @@ def transfer_to_athena() -> bool:
         transfer_pipeline = dlt.pipeline(
             pipeline_name="athena_log_transfer",
             destination=dlt.destinations.athena(lakeformation_config=None),
-            dataset_name="transferred_logs",
+            dataset_name=config.dataset_name,  # Use configured dataset name
         )
 
         logger.info("Athena transfer pipeline created successfully")
