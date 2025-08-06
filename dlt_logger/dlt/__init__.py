@@ -12,7 +12,9 @@ Usage Examples:
         >>> from dlt_logger.logging.models import LogEntry
         >>>
         >>> pipeline = get_pipeline()
-        >>> log_entry = LogEntry(project_name="test", run_id=RUN_ID, level="INFO", message="Test")
+        >>> log_entry = LogEntry(
+        ...     project_name="test", run_id=RUN_ID, level="INFO", message="Test"
+        ... )
         >>> pipeline.run(job_logs([log_entry]))
 
     Athena transfer:

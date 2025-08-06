@@ -41,7 +41,8 @@ def setup_console_logging():
     log_format = (
         "<green>{time:YYYY-MM-DD HH:mm:ss.SSS Z}</green> | "
         "<level>{level: <8}</level> | "
-        "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+        "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
+        "<level>{message}</level>"
     )
     logger.add(sys.stdout, format=log_format, level=config.log_level)
 

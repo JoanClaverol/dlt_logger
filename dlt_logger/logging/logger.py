@@ -120,10 +120,12 @@ class TPLogger:
         database queries, or any action that has a success/failure outcome.
 
         Args:
-            action (str): Name of the action being performed (e.g., "user_login", "data_export").
+            action (str): Name of the action being performed
+                (e.g., "user_login", "data_export").
             message (str): Human-readable message describing the action outcome.
             success (bool, optional): Whether the action succeeded. Defaults to True.
-            level (str, optional): Log level. If None, defaults to "INFO" for success, "ERROR" for failure.
+            level (str, optional): Log level. If None, defaults to "INFO"
+                for success, "ERROR" for failure.
             duration_ms (int, optional): Action duration in milliseconds.
             context (dict, optional): Additional structured data about the action.
             **kwargs: Additional fields to include in the log entry.
@@ -168,22 +170,30 @@ def setup_logging(**kwargs):
     console logging. This should be called once at application startup.
 
     Args:
-        project_name (str, optional): Name of your project. Defaults to "dlt_logger_app".
+        project_name (str, optional): Name of your project.
+            Defaults to "dlt_logger_app".
         db_path (str, optional): Path to DuckDB file. Defaults to "./logs/app.duckdb".
-        log_level (str, optional): Minimum log level ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"). Defaults to "INFO".
+        log_level (str, optional): Minimum log level ("DEBUG", "INFO",
+            "WARNING", "ERROR", "CRITICAL"). Defaults to "INFO".
         console_logging (bool, optional): Enable console output. Defaults to True.
         dataset_name (str, optional): DLT dataset name. Defaults to "dlt_logger_logs".
-        pipeline_name (str, optional): DLT pipeline name. Defaults to "dlt_logger_pipeline".
-        athena_destination (bool, optional): Enable AWS Athena integration. Defaults to False.
-        aws_region (str, optional): AWS region for Athena. Required if athena_destination=True.
-        athena_database (str, optional): Athena database name. Required if athena_destination=True.
-        athena_s3_staging_bucket (str, optional): S3 bucket for Athena staging. Required if athena_destination=True.
+        pipeline_name (str, optional): DLT pipeline name.
+            Defaults to "dlt_logger_pipeline".
+        athena_destination (bool, optional): Enable AWS Athena integration.
+            Defaults to False.
+        aws_region (str, optional): AWS region for Athena.
+            Required if athena_destination=True.
+        athena_database (str, optional): Athena database name.
+            Required if athena_destination=True.
+        athena_s3_staging_bucket (str, optional): S3 bucket for Athena staging.
+            Required if athena_destination=True.
 
     Returns:
         None
 
     Raises:
-        ValueError: If required Athena parameters are missing when athena_destination=True.
+        ValueError: If required Athena parameters are missing when
+            athena_destination=True.
 
     Example:
         >>> setup_logging(

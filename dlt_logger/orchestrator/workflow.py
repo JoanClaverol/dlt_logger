@@ -149,13 +149,15 @@ class WorkflowManager:
             # Debug current config state
             current_config = get_config()
             self.logger.info(
-                f"[WORKFLOW] Current global config - athena_destination: {current_config.athena_destination}"
+f"[WORKFLOW] Current global config - athena_destination: "
+                f"{current_config.athena_destination}"
             )
             self.logger.info(
                 f"[WORKFLOW] Current global config - db_path: {current_config.db_path}"
             )
             self.logger.info(
-                f"[WORKFLOW] Current global config - dataset_name: {current_config.dataset_name}"
+f"[WORKFLOW] Current global config - dataset_name: "
+                f"{current_config.dataset_name}"
             )
 
             # Check if database exists
@@ -163,7 +165,8 @@ class WorkflowManager:
 
             if os.path.exists(current_config.db_path):
                 self.logger.info(
-                    f"[WORKFLOW] Database file exists: {current_config.db_path} ({os.path.getsize(current_config.db_path)} bytes)"
+f"[WORKFLOW] Database file exists: {current_config.db_path} "
+                    f"({os.path.getsize(current_config.db_path)} bytes)"
                 )
             else:
                 self.logger.error(

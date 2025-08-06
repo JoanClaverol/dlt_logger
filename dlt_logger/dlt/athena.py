@@ -17,12 +17,14 @@ def _get_logger():
 
     return get_logger("athena")
 
+
 @dlt.resource(
     name="job_logs",
     write_disposition="append",
     columns=JOB_LOGS_COLUMNS,
+    primary_key=["project_name", "run_id", "level", "message"],
     parallelized=True,
-    table_format="iceberg"
+    table_format="iceberg",
 )
 def job_logs_resource(
     db_path: str, dataset_name: str, batch_size: int = 10000
@@ -81,8 +83,8 @@ def transfer_logs_to_athena() -> bool:
                 "dataset": config.dataset_name,
                 "aws_region": config.aws_region,
                 "athena_database": config.athena_database,
-                "s3_staging_bucket": config.athena_s3_staging_bucket
-            }
+                "s3_staging_bucket": config.athena_s3_staging_bucket,
+            },
         )
 
         # Validate Athena configuration
@@ -91,7 +93,7 @@ def transfer_logs_to_athena() -> bool:
                 action="athena_validation",
                 message="Athena transfer failed: athena_destination must be True",
                 success=False,
-                context={"athena_destination": config.athena_destination}
+                context={"athena_destination": config.athena_destination},
             )
             return False
 
@@ -105,8 +107,8 @@ def transfer_logs_to_athena() -> bool:
                 context={
                     "aws_region": config.aws_region,
                     "athena_database": config.athena_database,
-                    "athena_s3_staging_bucket": config.athena_s3_staging_bucket
-                }
+                    "athena_s3_staging_bucket": config.athena_s3_staging_bucket,
+                },
             )
             return False
 
@@ -116,7 +118,7 @@ def transfer_logs_to_athena() -> bool:
                 action="athena_validation",
                 message="Athena transfer failed: Source database does not exist",
                 success=False,
-                context={"db_path": config.db_path}
+                context={"db_path": config.db_path},
             )
             return False
 
@@ -127,8 +129,8 @@ def transfer_logs_to_athena() -> bool:
                 "database": config.db_path,
                 "dataset": config.dataset_name,
                 "aws_region": config.aws_region,
-                "athena_database": config.athena_database
-            }
+                "athena_database": config.athena_database,
+            },
         )
 
         # Create a clean, isolated pipeline to Athena destination
@@ -140,7 +142,7 @@ def transfer_logs_to_athena() -> bool:
 
         logger.info("Athena transfer pipeline created successfully")
 
-        # Run the pipeline with the resource - pass parameters to avoid context conflicts
+        # Run the pipeline with the resource - pass parameters to avoid conflicts
         logger.info("Starting data transfer to Athena...")
         transfer_pipeline.run(job_logs_resource(config.db_path, config.dataset_name))
 
@@ -152,8 +154,8 @@ def transfer_logs_to_athena() -> bool:
             context={
                 "source_db": config.db_path,
                 "dataset": config.dataset_name,
-                "destination_pipeline": "athena_log_transfer"
-            }
+                "destination_pipeline": "athena_log_transfer",
+            },
         )
         return True
 
@@ -167,7 +169,7 @@ def transfer_logs_to_athena() -> bool:
                 "exception_type": type(e).__name__,
                 "exception_message": str(e),
                 "source_db": config.db_path,
-                "dataset": config.dataset_name
-            }
+                "dataset": config.dataset_name,
+            },
         )
         return False

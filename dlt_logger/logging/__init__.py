@@ -12,7 +12,9 @@ Usage Examples:
         >>> setup_logging(project_name="my_app")
         >>> logger = TPLogger("my_module")
         >>> logger.info("Process started", action="startup")
-        >>> logger.log_action("user_login", "User authenticated", success=True, duration_ms=150)
+        >>> logger.log_action(
+        ...     "user_login", "User authenticated", success=True, duration_ms=150
+        ... )
 
     Decorator usage:
         >>> from dlt_logger.logging import log_execution

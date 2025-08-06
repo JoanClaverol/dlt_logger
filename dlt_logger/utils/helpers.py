@@ -116,7 +116,8 @@ def generate_sample_log_data(count: int = 10) -> list[dict[str, Any]]:
 
         data = {
             "action": action,
-            "message": f"Sample {action} operation {'succeeded' if success else 'failed'}",
+            "message": f"Sample {action} operation "
+            f"{'succeeded' if success else 'failed'}",
             "success": success,
             "level": level,
             "duration_ms": random.randint(50, 5000),
@@ -146,7 +147,10 @@ def get_database_info(
     try:
         with duckdb.connect(db_path, read_only=True) as conn:
             # Get table info using the configurable dataset name
-            tables_query = f"SELECT table_name FROM information_schema.tables WHERE table_schema = '{dataset_name}'"
+            tables_query = (
+                f"SELECT table_name FROM information_schema.tables "
+                f"WHERE table_schema = '{dataset_name}'"
+            )
             tables = conn.execute(tables_query).fetchall()
 
             info = {
@@ -189,7 +193,7 @@ def get_database_info_from_config() -> dict[str, Any]:
     return get_database_info(
         db_path=config.db_path,
         dataset_name=config.dataset_name,
-        table_name="job_logs",  # This could also be made configurable in LoggerConfig if needed
+        table_name="job_logs",  # Could be made configurable in LoggerConfig
     )
 
 
@@ -202,7 +206,7 @@ def detect_project_root(caller_frame_depth: int = 3) -> str:
 
     Args:
         caller_frame_depth (int): How many frames up the stack to look for the caller.
-                                 Default is 3 (typically the user's code calling setup_logging).
+            Default is 3 (typically the user's code calling setup_logging).
 
     Returns:
         str: Absolute path to the detected project root directory.
@@ -255,15 +259,15 @@ def find_project_root_from_path(start_path: str) -> str:
         str: Absolute path to the project root, or start_path if no indicators found.
     """
     project_indicators = [
-        'pyproject.toml',
-        'setup.py',
-        'requirements.txt',
-        '.git',
-        'Cargo.toml',
-        'package.json',
-        'go.mod',
-        'Dockerfile',
-        '.gitignore'
+        "pyproject.toml",
+        "setup.py",
+        "requirements.txt",
+        ".git",
+        "Cargo.toml",
+        "package.json",
+        "go.mod",
+        "Dockerfile",
+        ".gitignore",
     ]
 
     current_path = Path(start_path).resolve()
