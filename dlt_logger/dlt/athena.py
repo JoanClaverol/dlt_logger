@@ -17,7 +17,6 @@ def _get_logger():
 
     return get_logger("athena")
 
-
 @dlt.resource(
     name="job_logs",
     write_disposition="append",
@@ -60,7 +59,7 @@ def job_logs_resource(
             yield batch_data
 
 
-def transfer_to_athena() -> bool:
+def transfer_logs_to_athena() -> bool:
     """
     Transfer logs from local DuckDB to AWS Athena.
     Simplified implementation to avoid DLT context conflicts.

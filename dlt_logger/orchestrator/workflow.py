@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 from typing import Any, Optional
 
-from ..dlt import transfer_to_athena
+from ..dlt import transfer_logs_to_athena
 from ..logging import get_logger, setup_logging
 from ..setup import LoggerConfig, get_config, set_config
 from ..utils import (
@@ -128,7 +128,7 @@ class WorkflowManager:
             self.logger.error(f"❌ DuckDB storage verification failed: {str(e)}")
             return False
 
-    def step_4_transfer_to_athena(self) -> bool:
+    def step_4_transfer_logs_to_athena(self) -> bool:
         """Step 4: Transfer logs to AWS Athena (if configured)."""
         try:
             self.logger.info("=== STEP 4: Athena Transfer ===")
@@ -172,8 +172,8 @@ class WorkflowManager:
                 return False
 
             # Perform the transfer
-            self.logger.info("[WORKFLOW] Calling transfer_to_athena()...")
-            success = transfer_to_athena()
+            self.logger.info("[WORKFLOW] Calling transfer_logs_to_athena()...")
+            success = transfer_logs_to_athena()
 
             if success:
                 self.logger.info("✅ Athena transfer completed successfully")
@@ -239,7 +239,7 @@ class WorkflowManager:
         # Step 4: Athena Transfer
         step_start = time.time()
         results["steps"]["4_athena_transfer"] = {
-            "success": self.step_4_transfer_to_athena(),
+            "success": self.step_4_transfer_logs_to_athena(),
             "duration_ms": int((time.time() - step_start) * 1000),
         }
 

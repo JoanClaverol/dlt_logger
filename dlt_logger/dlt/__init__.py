@@ -16,7 +16,7 @@ Usage Examples:
         >>> pipeline.run(job_logs([log_entry]))
 
     Athena transfer:
-        >>> from dlt_logger.dlt import transfer_to_athena
+        >>> from dlt_logger.dlt import transfer_logs_to_athena
         >>> from dlt_logger.setup import LoggerConfig, set_config
         >>>
         >>> config = LoggerConfig(
@@ -26,7 +26,7 @@ Usage Examples:
         ...     athena_s3_staging_bucket="my-logs-bucket"
         ... )
         >>> set_config(config)
-        >>> success = transfer_to_athena()
+        >>> success = transfer_logs_to_athena()
         >>> print(f"Transfer {'succeeded' if success else 'failed'}")
 
 Note:
@@ -34,7 +34,7 @@ Note:
     For Athena operations, valid AWS credentials and S3 bucket access are required.
 """
 
-from .athena import job_logs_resource, transfer_to_athena
+from .athena import job_logs_resource, transfer_logs_to_athena
 from .pipeline import RUN_ID, get_pipeline, job_logs
 
 __all__ = [
@@ -42,5 +42,5 @@ __all__ = [
     "job_logs",
     "RUN_ID",
     "job_logs_resource",
-    "transfer_to_athena",
+    "transfer_logs_to_athena",
 ]

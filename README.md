@@ -212,10 +212,10 @@ dlt_logger.setup_logging(
 ### Transfer Data
 
 ```python
-from dlt_logger.dlt import transfer_to_athena
+from dlt_logger.dlt import transfer_logs_to_athena
 
 # Transfer logs to Athena
-success = transfer_to_athena()
+success = transfer_logs_to_athena()
 if success:
     print("✅ Logs uploaded to Athena")
 ```
