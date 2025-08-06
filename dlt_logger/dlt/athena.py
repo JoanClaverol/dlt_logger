@@ -75,7 +75,7 @@ def transfer_logs_to_athena() -> bool:
         # Log transfer start with structured data
         logger.log_action(
             action="athena_transfer_start",
-            message="Starting Athena transfer process",
+            message="Logging: Starting Athena transfer process",
             success=True,
             context={
                 "source_db": config.db_path,
@@ -90,7 +90,7 @@ def transfer_logs_to_athena() -> bool:
         if not config.athena_destination:
             logger.log_action(
                 action="athena_validation",
-                message="Athena transfer failed: athena_destination must be True",
+                message="Logging: Athena transfer failed: athena_destination must be True",
                 success=False,
                 context={"athena_destination": config.athena_destination},
             )
@@ -101,7 +101,7 @@ def transfer_logs_to_athena() -> bool:
         ):
             logger.log_action(
                 action="athena_validation",
-                message="Athena transfer failed: Missing required configuration",
+                message="Logging: Athena transfer failed: Missing required configuration",
                 success=False,
                 context={
                     "aws_region": config.aws_region,
@@ -123,7 +123,7 @@ def transfer_logs_to_athena() -> bool:
 
         # Log configuration validation success
         logger.info(
-            "Athena configuration validated successfully",
+            "Logging: Athena configuration validated successfully",
             context={
                 "database": config.db_path,
                 "dataset": config.dataset_name,
@@ -139,16 +139,16 @@ def transfer_logs_to_athena() -> bool:
             dataset_name=config.dataset_name,  # Use configured dataset name
         )
 
-        logger.info("Athena transfer pipeline created successfully")
+        logger.info("Logging: Athena transfer pipeline created successfully")
 
         # Run the pipeline with the resource - pass parameters to avoid conflicts
-        logger.info("Starting data transfer to Athena...")
+        logger.info("Logging: Starting data transfer to Athena...")
         transfer_pipeline.run(job_logs_resource(config.db_path, config.dataset_name))
 
         # Log successful completion
         logger.log_action(
             action="athena_transfer_complete",
-            message="Athena transfer completed successfully",
+            message="Logging: Athena transfer completed successfully",
             success=True,
             context={
                 "source_db": config.db_path,
@@ -162,7 +162,7 @@ def transfer_logs_to_athena() -> bool:
         # Log failure with exception details
         logger.log_action(
             action="athena_transfer_error",
-            message=f"Athena transfer failed: {str(e)}",
+            message=f"Logging: Athena transfer failed: {str(e)}",
             success=False,
             context={
                 "exception_type": type(e).__name__,
