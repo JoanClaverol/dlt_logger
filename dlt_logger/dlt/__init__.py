@@ -36,8 +36,28 @@ Note:
     For Athena operations, valid AWS credentials and S3 bucket access are required.
 """
 
+import warnings
 from .athena import job_logs_resource, transfer_logs_to_athena
 from .pipeline import RUN_ID, get_pipeline, job_logs
+
+
+def transfer_to_athena() -> bool:
+    """
+    Transfer logs from local DuckDB to AWS Athena.
+    
+    .. deprecated:: 0.1.1
+        Use `transfer_logs_to_athena` instead. This function will be removed in v0.2.0.
+    
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    warnings.warn(
+        "transfer_to_athena is deprecated and will be removed in v0.2.0. "
+        "Use transfer_logs_to_athena instead.",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return transfer_logs_to_athena()
 
 __all__ = [
     "get_pipeline",
@@ -45,4 +65,5 @@ __all__ = [
     "RUN_ID",
     "job_logs_resource",
     "transfer_logs_to_athena",
+    "transfer_to_athena",  # Backward compatibility (deprecated)
 ]
