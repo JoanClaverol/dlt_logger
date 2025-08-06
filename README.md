@@ -506,14 +506,6 @@ dlt_logger.setup_logging(
 )
 ```
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests: `uv run pytest`
-5. Submit a pull request
-
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
