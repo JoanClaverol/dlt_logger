@@ -22,7 +22,6 @@ def _get_logger():
     name="job_logs",
     write_disposition="append",
     columns=JOB_LOGS_COLUMNS,
-    primary_key=["project_name", "run_id", "level", "message"],
     parallelized=True,
     table_format="iceberg",
 )
