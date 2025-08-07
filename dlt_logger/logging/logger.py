@@ -1,6 +1,6 @@
 """Core TPLogger class for dlt-logger."""
 
-from typing import Any, Literal, Optional
+from typing import Literal, Optional
 
 from loguru import logger
 
@@ -15,7 +15,7 @@ class TPLogger:
 
     Provides structured logging with automatic storage to DuckDB via DLT pipelines.
     Supports both simple logging methods (info, warning, error) and advanced
-    action logging with metadata like timing, success status, and context.
+    action logging with metadata like timing and success status.
 
     Attributes:
         module_name (str): Name of the module this logger represents.
@@ -46,7 +46,6 @@ class TPLogger:
         status_code: Optional[int] = None,
         duration_ms: Optional[int] = None,
         request_method: Optional[str] = None,
-        context: Optional[dict[str, Any]] = None,
     ) -> LogEntry:
         """Create a LogEntry model."""
         return LogEntry(
@@ -61,7 +60,6 @@ class TPLogger:
             status_code=status_code,
             duration_ms=duration_ms,
             request_method=request_method,
-            context=context or {},
         )
 
     def _log_to_dlt(self, log_entry: LogEntry):
@@ -72,6 +70,18 @@ class TPLogger:
         except Exception as e:
             print(f"DLT logging failed: {e}")
 
+    def _validate_kwargs(self, **kwargs):
+        """Validate that kwargs only contain valid LogEntry fields."""
+        valid_fields = {
+            'action', 'function_name', 'success', 'status_code', 
+            'duration_ms', 'request_method'
+        }
+        
+        invalid_fields = set(kwargs.keys()) - valid_fields
+        if invalid_fields:
+            raise ValueError(f"Invalid log parameters: {invalid_fields}. "
+                           f"Only these fields are allowed: {valid_fields}")
+    
     def _log(
         self,
         level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
@@ -79,6 +89,9 @@ class TPLogger:
         **kwargs,
     ):
         """Internal logging method."""
+        # Validate kwargs to prevent invalid fields like 'context'
+        self._validate_kwargs(**kwargs)
+        
         # Console logging
         if self.config.console_logging:
             getattr(self.loguru_logger, level.lower())(message)
@@ -111,7 +124,6 @@ class TPLogger:
             Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
         ] = None,
         duration_ms: Optional[int] = None,
-        context: Optional[dict[str, Any]] = None,
         **kwargs,
     ):
         """Log a specific action with structured metadata.
@@ -127,8 +139,7 @@ class TPLogger:
             level (str, optional): Log level. If None, defaults to "INFO"
                 for success, "ERROR" for failure.
             duration_ms (int, optional): Action duration in milliseconds.
-            context (dict, optional): Additional structured data about the action.
-            **kwargs: Additional fields to include in the log entry.
+            **kwargs: Additional valid LogEntry fields (status_code, request_method, function_name).
 
         Example:
             >>> logger.log_action(
@@ -136,7 +147,7 @@ class TPLogger:
             ...     message="Retrieved user profile",
             ...     success=True,
             ...     duration_ms=45,
-            ...     context={"user_id": 123, "table": "users"}
+            ...     status_code=200
             ... )
         """
         if level is None:
@@ -148,7 +159,6 @@ class TPLogger:
             action=action,
             success=success,
             duration_ms=duration_ms,
-            context=context,
             **kwargs,
         )
 
@@ -159,7 +169,6 @@ class TPLogger:
             message=f"Exception in {action}: {str(exception)}",
             action=action,
             success=False,
-            context={"exception_type": type(exception).__name__},
         )
 
 

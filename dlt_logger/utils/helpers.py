@@ -28,58 +28,13 @@ def format_duration(duration_ms: Optional[int]) -> str:
         return f"{minutes}m {seconds:.2f}s"
 
 
-def sanitize_context(context: dict[str, Any]) -> dict[str, Any]:
-    """Sanitize context dictionary by removing or masking sensitive data.
-
-    Identifies and redacts potentially sensitive information like passwords,
-    API keys, tokens, and other authentication data to prevent accidental
-    logging of secrets.
-
-    Args:
-        context (dict): Dictionary containing context data to sanitize.
-
-    Returns:
-        dict: Sanitized dictionary with sensitive values replaced by "***REDACTED***".
-
-    Note:
-        Sensitive keys detected (case-insensitive): password, token, secret, key,
-        api_key, access_token, refresh_token, auth, authorization.
-
-    Example:
-        >>> context = {"user_id": 123, "api_key": "secret123", "message": "hello"}
-        >>> clean = sanitize_context(context)
-        >>> print(clean)
-        {"user_id": 123, "api_key": "***REDACTED***", "message": "hello"}
-    """
-    sensitive_keys = {
-        "password",
-        "token",
-        "secret",
-        "key",
-        "api_key",
-        "access_token",
-        "refresh_token",
-        "auth",
-        "authorization",
-    }
-
-    sanitized = {}
-    for key, value in context.items():
-        key_lower = key.lower()
-        if any(sensitive in key_lower for sensitive in sensitive_keys):
-            sanitized[key] = "***REDACTED***"
-        else:
-            sanitized[key] = value
-
-    return sanitized
 
 
 def generate_sample_log_data(count: int = 10) -> list[dict[str, Any]]:
     """Generate sample log data for testing and demonstration purposes.
 
-    Creates realistic log entries with random actions, success/failure outcomes,
-    and structured context data. Useful for testing the logging pipeline
-    and demonstrating tp-logger capabilities.
+    Creates realistic log entries with random actions, success/failure outcomes.
+    Useful for testing the logging pipeline and demonstrating tp-logger capabilities.
 
     Args:
         count (int, optional): Number of sample log entries to generate. Defaults to 10.
@@ -91,7 +46,6 @@ def generate_sample_log_data(count: int = 10) -> list[dict[str, Any]]:
             - success (bool): Random success/failure status
             - level (str): Log level based on success status
             - duration_ms (int): Random duration between 50-5000ms
-            - context (dict): Random user, session, and IP data
 
     Example:
         >>> samples = generate_sample_log_data(count=3)
@@ -121,11 +75,6 @@ def generate_sample_log_data(count: int = 10) -> list[dict[str, Any]]:
             "success": success,
             "level": level,
             "duration_ms": random.randint(50, 5000),
-            "context": {
-                "user_id": str(uuid4()),
-                "session_id": str(uuid4()),
-                "ip_address": f"192.168.1.{random.randint(1, 254)}",
-            },
         }
         sample_data.append(data)
 

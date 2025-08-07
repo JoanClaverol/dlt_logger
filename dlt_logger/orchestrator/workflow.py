@@ -84,7 +84,6 @@ class WorkflowManager:
                     success=data["success"],
                     level=data["level"],
                     duration_ms=data["duration_ms"],
-                    context=data["context"],
                 )
 
                 # Small delay to show real-time logging

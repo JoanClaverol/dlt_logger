@@ -69,7 +69,7 @@ logger = dlt_logger.get_logger(__name__)
 
 # 3. Start logging
 logger.info("Application started")
-logger.error("Something went wrong", context={"error_code": 500})
+logger.error("Something went wrong")
 
 # 4. Structured logging with metadata
 logger.log_action(
@@ -77,7 +77,6 @@ logger.log_action(
     message="New user registered",
     success=True,
     duration_ms=150,
-    context={"user_id": 12345}
 )
 ```
 
@@ -164,10 +163,6 @@ logger.log_action(
     success=True,                      # Success/failure status
     duration_ms=250,                   # Optional: Duration in milliseconds
     status_code=200,                   # Optional: HTTP status code
-    context={                          # Optional: Additional data
-        "user_id": 123,
-        "query": "SELECT * FROM users"
-    }
 )
 ```
 
@@ -339,7 +334,6 @@ Logs are stored with this structure:
 | status_code | INT | HTTP status code (if applicable) |
 | duration_ms | BIGINT | Duration in milliseconds |
 | request_method | TEXT | HTTP method (if applicable) |
-| context | JSON | Additional context data |
 
 ## 🔍 Querying Your Logs
 
@@ -408,11 +402,6 @@ class OrderProcessor:
             action="order_received",
             message=f"Processing order {order_id}",
             success=True,
-            context={
-                "order_id": order_id,
-                "item_count": len(items),
-                "total_value": sum(item["price"] for item in items)
-            }
         )
         
         # Validate
@@ -428,8 +417,7 @@ class OrderProcessor:
         self.logger.log_action(
             action="order_completed",
             message=f"Order {order_id} completed",
-            success=True,
-            context={"order_id": order_id}
+            success=True
         )
         
         return True
@@ -439,8 +427,7 @@ class OrderProcessor:
         self.logger.log_action(
             action="order_validation",
             message="Order validation " + ("passed" if success else "failed"),
-            success=success,
-            context={"item_count": len(items)}
+            success=success
         )
         return success
     
@@ -452,8 +439,7 @@ class OrderProcessor:
             action="payment_processing",
             message="Payment processed",
             success=success,
-            status_code=200 if success else 402,
-            context={"order_id": order_id}
+            status_code=200 if success else 402
         )
         return success
 

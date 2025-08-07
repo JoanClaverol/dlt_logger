@@ -3,7 +3,6 @@
 This module provides utility functions for:
 - Directory and file management
 - Duration formatting
-- Context sanitization (removes sensitive data)
 - Sample data generation for testing
 - Database inspection and analysis
 
@@ -29,12 +28,6 @@ Usage Examples:
         >>> print(f"Database has {db_info['total_logs']} log entries")
         >>> print(f"Tables: {db_info['tables']}")
 
-    Context sanitization:
-        >>> from dlt_logger.utils import sanitize_context
-        >>>
-        >>> context = {"user_id": 123, "api_key": "secret123", "data": "public"}
-        >>> clean = sanitize_context(context)
-        >>> # Result: {"user_id": 123, "api_key": "***REDACTED***", "data": "public"}
 """
 
 from .helpers import (
@@ -46,7 +39,6 @@ from .helpers import (
     get_database_info,
     get_database_info_from_config,
     resolve_project_path,
-    sanitize_context,
 )
 
 __all__ = [
@@ -58,5 +50,4 @@ __all__ = [
     "get_database_info",
     "get_database_info_from_config",
     "resolve_project_path",
-    "sanitize_context",
 ]

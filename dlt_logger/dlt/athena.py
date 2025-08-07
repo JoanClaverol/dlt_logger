@@ -8,6 +8,7 @@ import dlt
 import duckdb
 
 from ..setup import get_config
+from ..logging.models import LogEntry
 from .columns_schema import JOB_LOGS_COLUMNS
 
 
@@ -56,9 +57,21 @@ def job_logs_resource(
             if not batch_rows:
                 break
 
-            # Yield batch as a list of dictionaries
-            batch_data = [dict(zip(columns, row)) for row in batch_rows]
-            yield batch_data
+            # Convert batch to LogEntry models to ensure only valid fields are uploaded
+            batch_data = []
+            for row in batch_rows:
+                row_dict = dict(zip(columns, row))
+                try:
+                    # Validate through LogEntry model and get only defined fields
+                    log_entry = LogEntry(**row_dict)
+                    batch_data.append(log_entry.model_dump())
+                except Exception as e:
+                    # Skip invalid entries but log the issue
+                    print(f"[ATHENA] Skipping invalid log entry: {e}")
+                    continue
+            
+            if batch_data:
+                yield batch_data
 
 
 def transfer_logs_to_athena() -> bool:
@@ -78,13 +91,6 @@ def transfer_logs_to_athena() -> bool:
             action="athena_transfer_start",
             message="Logging: Starting Athena transfer process",
             success=True,
-            context={
-                "source_db": config.db_path,
-                "dataset": config.dataset_name,
-                "aws_region": config.aws_region,
-                "athena_database": config.athena_database,
-                "s3_staging_bucket": config.athena_s3_staging_bucket,
-            },
         )
 
         # Validate Athena configuration
@@ -93,7 +99,6 @@ def transfer_logs_to_athena() -> bool:
                 action="athena_validation",
                 message="Logging: Athena transfer failed: athena_destination must be True",
                 success=False,
-                context={"athena_destination": config.athena_destination},
             )
             return False
 
@@ -104,11 +109,6 @@ def transfer_logs_to_athena() -> bool:
                 action="athena_validation",
                 message="Logging: Athena transfer failed: Missing required configuration",
                 success=False,
-                context={
-                    "aws_region": config.aws_region,
-                    "athena_database": config.athena_database,
-                    "athena_s3_staging_bucket": config.athena_s3_staging_bucket,
-                },
             )
             return False
 
@@ -118,20 +118,11 @@ def transfer_logs_to_athena() -> bool:
                 action="athena_validation",
                 message="Athena transfer failed: Source database does not exist",
                 success=False,
-                context={"db_path": config.db_path},
             )
             return False
 
         # Log configuration validation success
-        logger.info(
-            "Logging: Athena configuration validated successfully",
-            context={
-                "database": config.db_path,
-                "dataset": config.dataset_name,
-                "aws_region": config.aws_region,
-                "athena_database": config.athena_database,
-            },
-        )
+        logger.info("Logging: Athena configuration validated successfully")
 
         # Create a clean, isolated pipeline to Athena destination
         transfer_pipeline = dlt.pipeline(
@@ -151,11 +142,6 @@ def transfer_logs_to_athena() -> bool:
             action="athena_transfer_complete",
             message="Logging: Athena transfer completed successfully",
             success=True,
-            context={
-                "source_db": config.db_path,
-                "dataset": config.dataset_name,
-                "destination_pipeline": "athena_log_transfer",
-            },
         )
         return True
 
@@ -165,11 +151,5 @@ def transfer_logs_to_athena() -> bool:
             action="athena_transfer_error",
             message=f"Logging: Athena transfer failed: {str(e)}",
             success=False,
-            context={
-                "exception_type": type(e).__name__,
-                "exception_message": str(e),
-                "source_db": config.db_path,
-                "dataset": config.dataset_name,
-            },
         )
         return False

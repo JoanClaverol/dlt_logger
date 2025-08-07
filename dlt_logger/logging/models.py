@@ -1,11 +1,10 @@
 """Pydantic models for tp-logger data structures."""
 
-import json
 from datetime import datetime
 from typing import Any, Literal, Optional
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 
 class LogEntry(BaseModel):
@@ -24,20 +23,6 @@ class LogEntry(BaseModel):
     status_code: Optional[int] = None
     duration_ms: Optional[int] = None
     request_method: Optional[str] = None
-    context: dict[str, Any] = Field(default_factory=dict)
-
-    @field_validator("context", mode="before")
-    @classmethod
-    def validate_context(cls, v):
-        """Ensure context is JSON serializable."""
-        if v is None or v == "":
-            return {}
-        if isinstance(v, str):
-            try:
-                return json.loads(v)
-            except json.JSONDecodeError:
-                return {"raw": v}
-        return v
 
     class Config:
         """Pydantic configuration."""
