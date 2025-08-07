@@ -66,6 +66,7 @@ def get_pipeline() -> dlt.Pipeline:
 @dlt.resource(
     write_disposition="append",
     columns=JOB_LOGS_COLUMNS,
+    max_table_nesting=0
 )
 def job_logs(log_entries: list[LogEntry]):
     """DLT resource for job logs."""
