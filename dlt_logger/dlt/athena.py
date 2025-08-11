@@ -21,7 +21,7 @@ def _get_logger():
 
 @dlt.resource(
     name="job_logs",
-    write_disposition="append",
+    write_disposition="replace",
     columns=JOB_LOGS_COLUMNS,
     parallelized=True,
     table_format="iceberg",
