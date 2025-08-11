@@ -179,16 +179,13 @@ def setup_logging(**kwargs):
     console logging. This should be called once at application startup.
 
     Args:
-        project_name (str, optional): Name of your project.
-            Defaults to "dlt_logger_app".
+        project_name (str): Name of your project. Required.
+        log_level (str): Minimum log level ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"). Required.
+        pipeline_name (str): DLT pipeline name. Required.
+        dataset_name (str): DLT dataset name. Required.
+        table_name (str): Table name within the dataset. Required.
         db_path (str, optional): Path to DuckDB file. Defaults to "./logs/app.duckdb".
-        log_level (str, optional): Minimum log level ("DEBUG", "INFO",
-            "WARNING", "ERROR", "CRITICAL"). Defaults to "INFO".
         console_logging (bool, optional): Enable console output. Defaults to True.
-        dataset_name (str, optional): DLT dataset name. Defaults to "dlt_logger_logs".
-        table_name (str, optional): Table name within the dataset. Defaults to "job_logs".
-        pipeline_name (str, optional): DLT pipeline name.
-            Defaults to "dlt_logger_pipeline".
         athena_destination (bool, optional): Enable AWS Athena integration.
             Defaults to False.
         aws_region (str, optional): AWS region for Athena.
@@ -208,8 +205,11 @@ def setup_logging(**kwargs):
     Example:
         >>> setup_logging(
         ...     project_name="my_app",
-        ...     db_path="./data/logs.duckdb",
         ...     log_level="DEBUG",
+        ...     pipeline_name="my_app_pipeline",
+        ...     dataset_name="my_app_logs",
+        ...     table_name="application_logs",
+        ...     db_path="./data/logs.duckdb",
         ...     console_logging=True
         ... )
     """

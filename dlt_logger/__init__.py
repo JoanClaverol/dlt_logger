@@ -9,6 +9,10 @@ Basic Usage:
     >>> # Setup logging configuration
     >>> dlt_logger.setup_logging(
     ...     project_name="my_app",
+    ...     log_level="INFO",
+    ...     pipeline_name="my_app_pipeline",
+    ...     dataset_name="my_app_logs",
+    ...     table_name="application_logs",
     ...     db_path="./logs/app.duckdb"
     ... )
     >>>
@@ -25,6 +29,10 @@ Workflow Management:
     >>> # Use WorkflowManager for end-to-end operations
     >>> config = dlt_logger.LoggerConfig(
     ...     project_name="workflow_demo",
+    ...     log_level="INFO",
+    ...     pipeline_name="workflow_pipeline",
+    ...     dataset_name="workflow_logs",
+    ...     table_name="workflow_events",
     ...     athena_destination=True,
     ...     aws_region="us-east-1"
     ... )

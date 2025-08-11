@@ -24,11 +24,12 @@ def create_basic_config() -> LoggerConfig:
     """Create a basic configuration for demonstration."""
     return LoggerConfig(
         project_name="dlt_logger_demo",
-        db_path="./logs/demo.duckdb",
         log_level="INFO",
-        console_logging=True,
         pipeline_name="demo_pipeline",
         dataset_name="demo_logs",
+        table_name="application_logs",
+        db_path="./logs/demo.duckdb",
+        console_logging=True,
         # Athena is disabled by default - enable if you have AWS credentials
         athena_destination=False,
         # Uncomment and configure if you want to test Athena transfer:
@@ -43,11 +44,12 @@ def create_athena_config() -> LoggerConfig:
     """Create a configuration with Athena enabled (requires AWS setup)."""
     return LoggerConfig(
         project_name="dlt_logger_athena_demo",
-        db_path="./logs/athena_demo.duckdb",
         log_level="INFO",
-        console_logging=True,
         pipeline_name="athena_demo_pipeline",
         dataset_name="athena_demo_logs",
+        table_name="production_logs",
+        db_path="./logs/athena_demo.duckdb",
+        console_logging=True,
         # Athena configuration
         athena_destination=True,
         aws_region="eu-west-3",

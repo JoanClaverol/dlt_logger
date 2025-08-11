@@ -13,7 +13,7 @@ A modern, structured logging library for Python with DuckDB storage and optional
 - **🔒 Type Safety**: Pydantic models ensure data consistency
 - **🖥️ Dual Output**: Console logging (via loguru) + database storage
 - **☁️ Cloud Ready**: Optional AWS Athena integration for analytics at scale
-- **🔧 Zero Config**: Works out of the box with sensible defaults
+- **🔧 Explicit Config**: Clear, required configuration for better maintainability
 
 ## 🚀 Quick Start
 
@@ -61,6 +61,10 @@ import dlt_logger
 # 1. Setup (call once at application startup)
 dlt_logger.setup_logging(
     project_name="my_app",
+    log_level="INFO",
+    pipeline_name="my_app_pipeline",
+    dataset_name="my_app_logs",
+    table_name="application_logs",
     db_path="./logs/app.duckdb"
 )
 
@@ -85,7 +89,13 @@ logger.log_action(
 ```python
 import dlt_logger
 
-dlt_logger.setup_logging(project_name="my_app")
+dlt_logger.setup_logging(
+    project_name="my_app",
+    log_level="INFO",
+    pipeline_name="my_app_pipeline",
+    dataset_name="my_app_logs",
+    table_name="application_logs"
+)
 
 @dlt_logger.log_execution("data_processing")
 def process_data(user_id: int):
@@ -109,11 +119,12 @@ Initialize the logging system. Call once at application startup.
 ```python
 dlt_logger.setup_logging(
     project_name="my_app",                    # Required: Your project name
+    log_level="INFO",                        # Required: Log level
+    pipeline_name="my_pipeline",             # Required: DLT pipeline name
+    dataset_name="my_logs",                  # Required: Database schema name
+    table_name="application_logs",           # Required: Table name
     db_path="./logs/app.duckdb",             # Optional: Database path
-    log_level="INFO",                        # Optional: Log level
     console_logging=True,                    # Optional: Enable console output
-    pipeline_name="my_pipeline",             # Optional: DLT pipeline name
-    dataset_name="my_logs",                  # Optional: Database schema name
 )
 ```
 
@@ -196,6 +207,10 @@ Upload your logs to AWS Athena for cloud-scale analytics.
 ```python
 dlt_logger.setup_logging(
     project_name="production_app",
+    log_level="INFO",
+    pipeline_name="production_pipeline",
+    dataset_name="production_logs",
+    table_name="application_events",
     # Enable Athena
     athena_destination=True,
     aws_region="us-east-1",
@@ -242,6 +257,10 @@ from dlt_logger import WorkflowManager, LoggerConfig
 
 config = LoggerConfig(
     project_name="data_pipeline",
+    log_level="INFO",
+    pipeline_name="data_processing_pipeline",
+    dataset_name="analytics_logs",
+    table_name="workflow_events",
     athena_destination=True,
     aws_region="us-west-2"
 )
@@ -260,8 +279,11 @@ from dlt_logger.setup import LoggerConfig
 
 config = LoggerConfig(
     project_name="custom_app",
-    db_path="./data/custom.duckdb",
     log_level="DEBUG",
+    pipeline_name="custom_pipeline",
+    dataset_name="custom_logs",
+    table_name="debug_events",
+    db_path="./data/custom.duckdb",
     console_logging=False,
     athena_destination=True,
     aws_region="eu-west-1"
@@ -284,12 +306,20 @@ dlt_logger.setup_logging(**config.__dict__)
 # All paths are resolved relative to your project root
 dlt_logger.setup_logging(
     project_name="my_app",
+    log_level="INFO",
+    pipeline_name="my_app_pipeline",
+    dataset_name="my_app_logs",
+    table_name="application_logs",
     db_path="./logs/app.duckdb"  # Creates: /your/project/logs/app.duckdb
 )
 
 # Manual project root override (if needed)
 dlt_logger.setup_logging(
-    project_name="my_app", 
+    project_name="my_app",
+    log_level="INFO",
+    pipeline_name="my_app_pipeline",
+    dataset_name="my_app_logs",
+    table_name="application_logs",
     db_path="./logs/app.duckdb",
     project_root="/custom/project/path"
 )
@@ -383,6 +413,10 @@ import time
 # Setup
 dlt_logger.setup_logging(
     project_name="ecommerce_api",
+    log_level="INFO",
+    pipeline_name="ecommerce_pipeline",
+    dataset_name="ecommerce_logs",
+    table_name="order_events",
     athena_destination=True,
     aws_region="us-east-1"
 )
@@ -488,6 +522,9 @@ if not all([config.athena_destination, config.aws_region,
 dlt_logger.setup_logging(
     project_name="debug_app",
     log_level="DEBUG",
+    pipeline_name="debug_pipeline",
+    dataset_name="debug_logs",
+    table_name="debug_events",
     console_logging=True
 )
 ```

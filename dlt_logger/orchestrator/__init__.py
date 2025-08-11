@@ -13,6 +13,10 @@ Usage Example:
     >>> # Create configuration
     >>> config = LoggerConfig(
     ...     project_name="production_app",
+    ...     log_level="INFO",
+    ...     pipeline_name="production_pipeline",
+    ...     dataset_name="production_logs",
+    ...     table_name="application_events",
     ...     db_path="./logs/prod.duckdb",
     ...     athena_destination=True,
     ...     aws_region="us-west-2",

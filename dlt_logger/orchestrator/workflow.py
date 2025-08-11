@@ -43,11 +43,12 @@ class WorkflowManager:
             # Setup logging infrastructure with full config
             setup_logging(
                 project_name=self.config.project_name,
-                db_path=self.config.db_path,
-                console_logging=self.config.console_logging,
                 log_level=self.config.log_level,
                 pipeline_name=self.config.pipeline_name,
                 dataset_name=self.config.dataset_name,
+                table_name=self.config.table_name,
+                db_path=self.config.db_path,
+                console_logging=self.config.console_logging,
                 athena_destination=self.config.athena_destination,
                 aws_region=self.config.aws_region,
                 athena_database=self.config.athena_database,

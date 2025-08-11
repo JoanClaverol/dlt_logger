@@ -22,6 +22,11 @@ Usage Examples:
         >>> from dlt_logger.setup import LoggerConfig, set_config
         >>>
         >>> config = LoggerConfig(
+        ...     project_name="athena_demo",
+        ...     log_level="INFO",
+        ...     pipeline_name="athena_pipeline",
+        ...     dataset_name="athena_logs",
+        ...     table_name="log_events",
         ...     athena_destination=True,
         ...     aws_region="us-east-1",
         ...     athena_database="logs_db",

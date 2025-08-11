@@ -11,13 +11,13 @@ class LoggerConfig:
 
     def __init__(
         self,
-        project_name: str = "dlt_logger_app",
+        project_name: str,
+        log_level: str,
+        pipeline_name: str,
+        dataset_name: str,
+        table_name: str,
         db_path: Optional[str] = None,
-        log_level: str = "INFO",
         console_logging: bool = True,
-        pipeline_name: str = "dlt_logger_pipeline",
-        dataset_name: str = "dlt_logger_logs",
-        table_name: str = "job_logs",
         sync_to_s3: bool = False,
         aws_s3_bucket: Optional[str] = None,
         aws_s3_key_prefix: str = "logs/",
@@ -85,7 +85,10 @@ def get_config() -> LoggerConfig:
     """Get the global configuration instance."""
     global _config
     if _config is None:
-        _config = LoggerConfig()
+        raise ValueError(
+            "Logger configuration not initialized. Please call setup_logging() first with "
+            "required parameters: project_name, log_level, pipeline_name, dataset_name, table_name"
+        )
     return _config
 
 
