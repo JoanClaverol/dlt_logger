@@ -17,6 +17,7 @@ class LoggerConfig:
         console_logging: bool = True,
         pipeline_name: str = "dlt_logger_pipeline",
         dataset_name: str = "dlt_logger_logs",
+        table_name: str = "job_logs",
         sync_to_s3: bool = False,
         aws_s3_bucket: Optional[str] = None,
         aws_s3_key_prefix: str = "logs/",
@@ -32,6 +33,7 @@ class LoggerConfig:
         self.console_logging = console_logging
         self.pipeline_name = pipeline_name
         self.dataset_name = dataset_name
+        self.table_name = table_name
         self.sync_to_s3 = sync_to_s3
         self.aws_s3_bucket = aws_s3_bucket
         self.aws_s3_key_prefix = aws_s3_key_prefix

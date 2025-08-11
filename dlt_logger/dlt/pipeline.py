@@ -63,12 +63,18 @@ def get_pipeline() -> dlt.Pipeline:
     return _pipeline
 
 
-@dlt.resource(
-    write_disposition="append",
-    columns=JOB_LOGS_COLUMNS,
-    max_table_nesting=0
-)
 def job_logs(log_entries: list[LogEntry]):
-    """DLT resource for job logs."""
-    for entry in log_entries:
-        yield entry.model_dump()
+    """DLT resource for job logs with dynamic table name."""
+    config = get_config()
+    
+    @dlt.resource(
+        name=config.table_name,
+        write_disposition="append",
+        columns=JOB_LOGS_COLUMNS,
+        max_table_nesting=0
+    )
+    def _job_logs_resource():
+        for entry in log_entries:
+            yield entry.model_dump()
+    
+    return _job_logs_resource()

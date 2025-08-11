@@ -186,6 +186,7 @@ def setup_logging(**kwargs):
             "WARNING", "ERROR", "CRITICAL"). Defaults to "INFO".
         console_logging (bool, optional): Enable console output. Defaults to True.
         dataset_name (str, optional): DLT dataset name. Defaults to "dlt_logger_logs".
+        table_name (str, optional): Table name within the dataset. Defaults to "job_logs".
         pipeline_name (str, optional): DLT pipeline name.
             Defaults to "dlt_logger_pipeline".
         athena_destination (bool, optional): Enable AWS Athena integration.
